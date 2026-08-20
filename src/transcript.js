@@ -5,7 +5,8 @@
  *   - `data`:  the parsed JSON tree, when the input was JSON.
  */
 
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
+import path from 'node:path';
 
 const TEXT_KEYS = new Set([
   'text', 'content', 'body', 'message', 'markdown', 'value', 'answer', 'response'
@@ -220,11 +221,76 @@ export function conversationApiUrl(url) {
   return `https://claude.ai/api/organizations/current/chat_conversations/${match[1]}?rendering_mode=raw`;
 }
 
+/** File types worth scanning when a directory is given as the source. */
+export const SOURCE_EXTENSIONS = ['.json', '.md', '.markdown', '.txt', '.text', '.html', '.htm'];
+
+async function isDirectory(target) {
+  try {
+    return (await stat(target)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+/** Merge several loaded sources into one scannable unit. */
+export function mergeSources(loaded) {
+  const blobs = [];
+  const data = [];
+  for (const source of loaded) {
+    const label = source.origin ? path.basename(source.origin) : '';
+    for (const blob of source.blobs) {
+      blobs.push({ ...blob, label: label ? `${label}: ${blob.label}` : blob.label });
+    }
+    if (source.data !== undefined) data.push(source.data);
+  }
+  return {
+    raw: '',
+    format: 'mixed',
+    data: data.length ? data : undefined,
+    blobs,
+    origin: loaded.map((source) => source.origin).join(', ')
+  };
+}
+
+/**
+ * Load every supported file in a directory (recursively) as one source.
+ * Lets a folder of pasted chats be exported in a single run.
+ */
+export async function loadDirectory(dir, options = {}) {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const loaded = [];
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    if (entry.name.startsWith('.')) continue;
+    const target = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      loaded.push(await loadDirectory(target, options));
+      continue;
+    }
+    if (!SOURCE_EXTENSIONS.includes(path.extname(entry.name).toLowerCase())) continue;
+    loaded.push(await loadSource(target, options));
+  }
+  if (!loaded.length) return { raw: '', format: 'mixed', data: undefined, blobs: [], origin: dir };
+  return { ...mergeSources(loaded), origin: dir };
+}
+
+/** Load one or many sources (files, directories, URLs, stdin) as one unit. */
+export async function loadSources(sources, options = {}) {
+  const list = Array.isArray(sources) ? sources : [sources];
+  if (list.length === 1) return loadSource(list[0], options);
+  const loaded = [];
+  for (const source of list) loaded.push(await loadSource(source, options));
+  return mergeSources(loaded);
+}
+
 /**
  * Load an input source into { raw, format, data, blobs, origin }.
- * `source` is a URL, a file path, or "-" for stdin.
+ * `source` is a URL, a file path, a directory, or "-" for stdin.
  */
 export async function loadSource(source, options = {}) {
+  if (!isClaudeUrl(source) && source !== '-' && (await isDirectory(source))) {
+    return loadDirectory(source, options);
+  }
+
   let raw;
   let origin = source;
   let format = options.format || 'auto';

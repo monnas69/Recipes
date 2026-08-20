@@ -3,17 +3,18 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { loadSource } from './transcript.js';
+import { loadSources } from './transcript.js';
 import { extractRecipes } from './parse.js';
 import { renderCard, renderIndex } from './render.js';
 import { htmlFileToPdf } from './pdf.js';
+import { scanLibrary, mergeLibrary } from './library.js';
 
 /**
- * Find every recipe in a source without writing anything.
+ * Find every recipe in one or more sources without writing anything.
  * @returns {Promise<{recipes: Array, stats: object, origin: string}>}
  */
 export async function collectRecipes(source, options = {}) {
-  const loaded = await loadSource(source, {
+  const loaded = await loadSources(source, {
     format: options.format,
     sessionKey: options.sessionKey
   });
@@ -39,10 +40,19 @@ export async function exportRecipes(source, options = {}) {
   const generatedAt = options.generatedAt || new Date().toISOString();
   const files = [];
 
-  if (!recipes.length) return { recipes, files, stats, origin, outDir };
+  if (!recipes.length) return { recipes, files, stats, origin, outDir, library: [] };
 
   await mkdir(outDir, { recursive: true });
-  const wantIndex = options.index !== false && recipes.length > 1;
+
+  // The index is rebuilt from every card in the folder, not just this run's,
+  // so exporting one new chat into an existing library keeps the rest listed.
+  const existing = options.library === false ? [] : await scanLibrary(outDir);
+  const library = options.library === false ? recipes : mergeLibrary(existing, recipes);
+  stats.library = library.length;
+  stats.carried_over = Math.max(0, library.length - recipes.length);
+  // Always written: the output folder is meant to be browsable (and a GitHub
+  // Pages site needs a root page even when it holds a single card).
+  const wantIndex = options.index !== false;
 
   for (const recipe of recipes) {
     const html = renderCard(recipe, {
@@ -63,8 +73,13 @@ export async function exportRecipes(source, options = {}) {
 
   if (wantIndex) {
     const indexPath = path.join(outDir, 'index.html');
-    await writeFile(indexPath, renderIndex(recipes, { generatedAt, sourceLabel: options.sourceLabel ?? origin }), 'utf8');
-    files.push({ type: 'index', path: indexPath });
+    const html = renderIndex(library, {
+      generatedAt,
+      sourceLabel: options.sourceLabel ?? origin,
+      title: options.siteTitle
+    });
+    await writeFile(indexPath, html, 'utf8');
+    files.push({ type: 'index', path: indexPath, cards: library.length });
   }
 
   if (options.json) {
@@ -73,5 +88,5 @@ export async function exportRecipes(source, options = {}) {
     files.push({ type: 'json', path: jsonPath });
   }
 
-  return { recipes, files, stats, origin, outDir };
+  return { recipes, files, stats, origin, outDir, library };
 }

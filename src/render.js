@@ -157,6 +157,8 @@ export function renderCard(recipe, options = {}) {
   const payload = {
     title: recipe.title,
     slug: recipe.slug,
+    description: recipe.description,
+    exported_at: generatedAt,
     base_servings: recipe.base_servings,
     servings_unit: recipe.servings_unit,
     ingredients: recipe.ingredients,
@@ -251,25 +253,39 @@ ${CLIENT_JS}
 `;
 }
 
-/** Batch export landing page linking every card from one conversation. */
+/**
+ * Library index: the front page of a folder of cards.
+ *
+ * Rendered from every card in the folder (see src/library.js), with a
+ * client-side filter so a growing collection stays navigable. Like the cards
+ * themselves it is one self-contained file — which is all GitHub Pages needs.
+ */
 export function renderIndex(recipes, options = {}) {
   const generatedAt = options.generatedAt || new Date().toISOString();
   const sourceLabel = options.sourceLabel || '';
-  const cards = recipes.map((recipe) => {
-    const timers = recipe.steps.filter((s) => s.timer_seconds).length;
+  const heading = options.title || 'Recipe cards';
+
+  const items = recipes.map((recipe) => {
+    const timers = (recipe.steps || []).filter((step) => step.timer_seconds).length;
     const bits = [
-      `${recipe.ingredients.length} ingredients`,
-      `${recipe.steps.length} steps`,
-      timers ? `${timers} timers` : null,
+      `${(recipe.ingredients || []).length} ingredients`,
+      `${(recipe.steps || []).length} steps`,
+      timers ? `${timers} timer${timers === 1 ? '' : 's'}` : null,
       `serves ${recipe.base_servings}`
     ].filter(Boolean);
-    return `      <li class="ingredient">
-        <a class="index-link" href="${escapeHtml(recipe.slug)}.html">
-          <strong>${escapeHtml(recipe.title)}</strong>
-          ${recipe.description ? `<span class="ingredient-note">${escapeHtml(recipe.description)}</span>` : ''}
-          <span class="ingredient-note">${escapeHtml(bits.join(' · '))}</span>
-        </a>
-      </li>`;
+    const haystack = [
+      recipe.title,
+      recipe.description,
+      ...(recipe.ingredients || []).map((ingredient) => ingredient.name)
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    return `        <li class="card-row" data-search="${escapeHtml(haystack)}">
+          <a class="index-link" href="${escapeHtml(recipe.file || `${recipe.slug}.html`)}">
+            <strong>${escapeHtml(recipe.title)}</strong>
+            ${recipe.description ? `<span class="row-note">${escapeHtml(recipe.description)}</span>` : ''}
+            <span class="row-meta">${escapeHtml(bits.join(' · '))}</span>
+          </a>
+        </li>`;
   });
 
   return `<!doctype html>
@@ -278,32 +294,89 @@ export function renderIndex(recipes, options = {}) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Recipe cards</title>
+<title>${escapeHtml(heading)}</title>
 <meta name="generator" content="ninja-recipe-card-exporter">
 <style>
 ${CSS}
-.index-link { display: flex; flex-direction: column; gap: 2px; text-decoration: none; color: inherit; padding: 6px 0; }
+.search-row { display: flex; gap: 10px; align-items: center; margin: 0 0 16px; }
+#search {
+  flex: 1 1 auto;
+  font: inherit;
+  color: inherit;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+#search:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#search-count { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.card-row { border-bottom: 1px dashed var(--border); }
+.card-row:last-child { border-bottom: 0; }
+.card-row[hidden] { display: none; }
+.index-link {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 0;
+  text-decoration: none;
+  color: inherit;
+}
 .index-link:hover strong { color: var(--accent); }
-.ingredient { align-items: stretch; }
+.index-link strong { font-size: 1.05rem; }
+.row-note { color: var(--muted); }
+.row-meta { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); padding: 18px 0; }
+.empty[hidden] { display: none; }
 </style>
 </head>
 <body>
 <main class="card">
   <header class="card-header">
-    <div class="eyebrow"><span>Batch export</span><span>${recipes.length} card${recipes.length === 1 ? '' : 's'}</span></div>
-    <h1>Recipe cards</h1>
-    ${sourceLabel ? `<p class="description">From ${escapeHtml(sourceLabel)}</p>` : ''}
+    <div class="eyebrow">
+      <span>Recipe library</span>
+      <span>${recipes.length} card${recipes.length === 1 ? '' : 's'}</span>
+    </div>
+    <h1>${escapeHtml(heading)}</h1>
+    ${sourceLabel ? `<p class="description">Last built from ${escapeHtml(sourceLabel)}</p>` : ''}
   </header>
   <section>
-    <h2>Cards</h2>
-    <ul class="list">
-${cards.join('\n')}
+    <div class="search-row no-print">
+      <input type="search" id="search" placeholder="Filter by name or ingredient…" aria-label="Filter recipes">
+      <span id="search-count"></span>
+    </div>
+    <ul class="list" id="card-list">
+${items.join('\n')}
     </ul>
+    <p class="empty" id="empty" hidden>Nothing matches that.</p>
   </section>
   <footer class="card-footer">
-    <span>Exported ${escapeHtml(generatedAt.slice(0, 10))} with ninja-recipe-card-exporter</span>
+    <span>Rebuilt ${escapeHtml(generatedAt.slice(0, 10))} with ninja-recipe-card-exporter</span>
+    <span>${recipes.length} card${recipes.length === 1 ? '' : 's'} in this folder</span>
   </footer>
 </main>
+<script>
+(function () {
+  var input = document.getElementById('search');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('.card-row'));
+  var count = document.getElementById('search-count');
+  var empty = document.getElementById('empty');
+
+  function apply() {
+    var query = input.value.trim().toLowerCase();
+    var shown = 0;
+    for (var i = 0; i < rows.length; i += 1) {
+      var match = !query || rows[i].getAttribute('data-search').indexOf(query) !== -1;
+      rows[i].hidden = !match;
+      if (match) shown += 1;
+    }
+    count.textContent = query ? shown + ' of ' + rows.length : rows.length + ' recipes';
+    empty.hidden = shown !== 0;
+  }
+
+  input.addEventListener('input', apply);
+  apply();
+})();
+</script>
 </body>
 </html>
 `;

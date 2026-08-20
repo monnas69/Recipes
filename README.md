@@ -10,8 +10,8 @@ laptop, AirDrop it to a phone, print it, or keep it in a folder on a NAS. It
 works with the Wi-Fi off.
 
 <p align="center">
-  <img src="docs/card-light.png" alt="An exported recipe card in light mode" width="46%">
-  <img src="docs/card-dark.png" alt="The same card in dark mode" width="46%">
+  <img src="docs/screenshots/card-light.png" alt="An exported recipe card in light mode" width="46%">
+  <img src="docs/screenshots/card-dark.png" alt="The same card in dark mode" width="46%">
 </p>
 
 ## Install
@@ -61,6 +61,8 @@ Exported 3 recipe cards to /home/you/cards
 | Source | How |
 | --- | --- |
 | Conversation export (`.json`) | Claude's data export, a single-conversation API response, or any JSON with a `chat_messages` / `messages` array |
+| A folder | every supported file inside it (recursively) is scanned in one run |
+| Several sources | `ninja-recipes chat1.md chat2.json -o cards` |
 | Markdown or plain text (`.md`, `.txt`) | A pasted or exported transcript |
 | Saved page (`.html`) | "Save page as" from the browser — inline JSON and visible text are both scanned |
 | stdin | `ninja-recipes -` |
@@ -134,8 +136,11 @@ Each card is one HTML file with everything inlined:
 - **Print-friendly** — controls drop away, colours flatten, steps avoid page
   breaks. `--pdf` prints the same layout to a file.
 - **schema.org `Recipe` JSON-LD** — embedded so other recipe apps can import it.
-- **Batch index** — exporting several cards also writes `index.html` linking
-  them all.
+- **A self-rebuilding index** — every export writes `index.html`, built from
+  *every* card in the output folder rather than just the run that wrote it. Add
+  one chat to an existing library and the rest stay listed; delete a card file
+  and it leaves the index on the next build. It carries a filter box that
+  searches titles, descriptions and ingredients.
 
 ## Options
 
@@ -143,7 +148,10 @@ Each card is one HTML file with everything inlined:
   -o, --out <dir>        output directory                 (default: recipe-cards)
   -f, --format <fmt>     auto | json | markdown | text | html   (default: auto)
       --pdf              also write a PDF per card
-      --no-index         skip index.html when exporting several cards
+      --no-index         never write index.html
+      --no-library       build index.html from this run only, ignoring cards
+                         already in the output folder
+      --site-title <t>   heading for index.html         (default: Recipe cards)
       --json             also write recipes.json (the normalised data)
       --keep <mode>      all | latest — latest keeps only the newest card per title
       --title <text>     only export cards whose title contains <text>
@@ -158,6 +166,41 @@ Each card is one HTML file with everything inlined:
 
 `--keep latest` is the one worth remembering: when a conversation revised a
 recipe several times, it keeps only the final version of each title.
+
+## Publish to GitHub Pages
+
+The repo ships with everything needed to serve your cards as a real website, so
+the library is a tap away on a phone instead of a folder of files to download.
+
+**One-time setup:** *Settings → Pages → Source: **GitHub Actions***. That's the
+only click.
+
+**After that, the loop is:**
+
+```bash
+cp ~/Desktop/chat.md recipes/2026-08-20-miso-salmon.md
+git add recipes && git commit -m "Add miso salmon" && git push
+```
+
+`.github/workflows/pages.yml` runs the tests, rebuilds every card from
+`recipes/` into `docs/`, and publishes it to
+`https://<you>.github.io/<repo>/`. The index reappears with the new recipe in
+it, sorted and searchable.
+
+<p align="center">
+  <img src="docs/screenshots/library-index.png" alt="The library index with its filter box" width="70%">
+</p>
+
+`recipes/` holds your **sources** — the pasted chats. `docs/` holds the
+**output** and is rebuilt from scratch each time, so edit a source and rebuild
+rather than editing a card by hand. To preview before pushing:
+
+```bash
+npm run site && open docs/index.html
+```
+
+Prefer no Actions? Set *Pages → Source: Deploy from a branch → main → /docs*
+instead, run `npm run site` yourself, and commit the `docs/` folder.
 
 ### PDF export
 
@@ -188,6 +231,8 @@ Also exported: `extractRecipes`, `parseMarkdownRecipes`, `findStructuredCards`,
 ## Layout
 
 ```
+recipes/               your pasted chats (the sources for the site)
+docs/                  the built site: index.html + one file per card
 bin/ninja-recipes.js   CLI entry point
 src/cli.js             argument parsing, output messages
 src/transcript.js      input loading: URL, JSON, HTML, Markdown, stdin
@@ -195,6 +240,7 @@ src/parse.js           card extraction (fences, tags, inline JSON, Markdown)
 src/normalize.js       alias handling → one canonical recipe shape
 src/render.js          canonical recipe → self-contained HTML
 src/export.js          pipeline: load → extract → render → write
+src/library.js         reads existing cards back out of the output folder
 src/pdf.js             optional PDF backends
 src/shared/            inlined into every card: format.js, card.css, card-client.js
 ```
@@ -209,10 +255,11 @@ same code the CLI tests cover.
 npm test
 ```
 
-49 tests: quantity parsing, scaling and unit agreement, card extraction from
+61 tests: quantity parsing, scaling and unit agreement, card extraction from
 every supported shape, HTML rendering (escaping, no external references,
-embedded data), the CLI end to end, and a real-browser pass driving the
-slider, checkboxes, timers, theme toggle and print styles. The browser test
+embedded data), library rebuilds (carry-over, deletion, re-export), the CLI end
+to end, and a real-browser pass driving the slider, checkboxes, timers, theme
+toggle and print styles. The browser test
 skips itself unless Playwright is installed:
 
 ```bash

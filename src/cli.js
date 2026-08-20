@@ -19,6 +19,8 @@ const OPTIONS = {
   title: { type: 'string' },
   cookie: { type: 'string' },
   'markdown-fallback': { type: 'boolean', default: true },
+  library: { type: 'boolean', default: true },
+  'site-title': { type: 'string' },
   list: { type: 'boolean', default: false },
   stdout: { type: 'boolean', default: false },
   quiet: { type: 'boolean', short: 'q', default: false },
@@ -30,10 +32,11 @@ const HELP = `
 ninja-recipes — export Claude.ai recipe cards to self-contained HTML
 
 Usage
-  ninja-recipes <source> [options]
+  ninja-recipes <source...> [options]
 
-Source
+Source                   (several may be given; they are exported together)
   <file>                 conversation export: .json, .md, .txt or saved .html
+  <dir>                  a folder of them — every supported file is scanned
   <url>                  https://claude.ai/chat/<id>  (needs --cookie, see below)
   -                      read the transcript from stdin
 
@@ -41,7 +44,10 @@ Options
   -o, --out <dir>        output directory                 (default: recipe-cards)
   -f, --format <fmt>     auto | json | markdown | text | html   (default: auto)
       --pdf              also write a PDF per card (puppeteer or local Chrome)
-      --no-index         skip index.html when exporting several cards
+      --no-index         never write index.html
+      --no-library       build index.html from this run only, ignoring cards
+                         already in the output folder
+      --site-title <t>   heading for index.html         (default: Recipe cards)
       --json             also write recipes.json (the normalised data)
       --keep <mode>      all | latest  — latest keeps only the newest card per
                          title, useful when a chat revised a recipe   (default: all)
@@ -58,6 +64,7 @@ Options
 
 Examples
   ninja-recipes chat-export.json -o cards
+  ninja-recipes recipes/ -o docs            # rebuild a whole library
   ninja-recipes transcript.md --pdf --keep latest
   pbpaste | ninja-recipes - --stdout > card.html
   CLAUDE_SESSION_KEY=sk-... ninja-recipes https://claude.ai/chat/<id> -o cards
@@ -88,8 +95,8 @@ export async function main(argv = process.argv.slice(2), io = console) {
   if (values.help) { io.log(HELP.trim()); return 0; }
   if (values.version) { io.log(pkg.version); return 0; }
 
-  const source = positionals[0];
-  if (!source) {
+  const sources = positionals;
+  if (!sources.length) {
     io.error('Missing source. Pass a file, a Claude.ai URL, or `-` for stdin.\n' + HELP.trim());
     return 2;
   }
@@ -109,7 +116,7 @@ export async function main(argv = process.argv.slice(2), io = console) {
 
   try {
     if (values.list || values.stdout) {
-      const { recipes, stats, origin } = await collectRecipes(source, shared);
+      const { recipes, stats, origin } = await collectRecipes(sources, shared);
       if (!recipes.length) {
         io.error(noRecipesMessage(origin, stats));
         return 1;
@@ -124,11 +131,13 @@ export async function main(argv = process.argv.slice(2), io = console) {
       return 0;
     }
 
-    const result = await exportRecipes(source, {
+    const result = await exportRecipes(sources, {
       ...shared,
       outDir: values.out,
       pdf: values.pdf,
       index: values.index,
+      library: values.library,
+      siteTitle: values['site-title'],
       json: values.json
     });
 
@@ -140,7 +149,12 @@ export async function main(argv = process.argv.slice(2), io = console) {
     log(`Exported ${result.recipes.length} recipe card${result.recipes.length === 1 ? '' : 's'} to ${result.outDir}`);
     for (const recipe of result.recipes) log(`  • ${describe(recipe)}`);
     for (const file of result.files) {
-      if (file.type === 'index') log(`  ↳ index: ${path.relative(process.cwd(), file.path)}`);
+      if (file.type === 'index') {
+        const carried = result.stats.carried_over
+          ? ` (${result.stats.carried_over} already in the folder)`
+          : '';
+        log(`  ↳ index: ${path.relative(process.cwd(), file.path)} — ${file.cards} card${file.cards === 1 ? '' : 's'}${carried}`);
+      }
       if (file.type === 'json') log(`  ↳ data:  ${path.relative(process.cwd(), file.path)}`);
       if (file.type === 'pdf') log(`  ↳ pdf:   ${path.relative(process.cwd(), file.path)} [${file.backend}]`);
     }

@@ -39,7 +39,13 @@ test('an exported card works offline in a real browser', async (t) => {
   assert.equal(recipes.length, 1);
   const url = pathToFileURL(path.join(outDir, `${recipes[0].slug}.html`)).href;
 
-  const browser = await playwright.chromium.launch({ args: ['--no-sandbox'] });
+  let browser;
+  try {
+    browser = await playwright.chromium.launch({ args: ['--no-sandbox'] });
+  } catch (error) {
+    // Playwright is present but its browsers are not downloaded (common on CI).
+    return t.skip(`chromium is not available: ${error.message.split('\n')[0]}`);
+  }
   try {
     const page = await browser.newPage();
     const errors = [];

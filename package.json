@@ -17,7 +17,9 @@
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
-    "export": "node bin/ninja-recipes.js"
+    "export": "node bin/ninja-recipes.js",
+    "site": "node bin/ninja-recipes.js recipes -o docs --site-title \"Recipes\"",
+    "site:pdf": "node bin/ninja-recipes.js recipes -o docs --site-title \"Recipes\" --pdf"
   },
   "engines": {
     "node": ">=18"

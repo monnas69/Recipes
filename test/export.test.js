@@ -46,13 +46,19 @@ test('exports every card in the example conversation', async () => {
   assert.equal(data.recipes.length, 3);
 });
 
-test('reads a Markdown transcript and skips the index for a single card', async () => {
+test('reads a Markdown transcript and still writes a browsable index', async () => {
   const outDir = await tmp();
   const result = await exportRecipes(MARKDOWN_EXAMPLE, { outDir });
   assert.equal(result.recipes.length, 1);
+  assert.deepEqual((await readdir(outDir)).sort(), ['index.html', 'spaghetti-with-anchovy-breadcrumbs.html']);
+  const index = await readFile(path.join(outDir, 'index.html'), 'utf8');
+  assert.ok(index.includes('href="spaghetti-with-anchovy-breadcrumbs.html"'));
+});
+
+test('--no-index leaves the folder without a front page', async () => {
+  const outDir = await tmp();
+  await exportRecipes(MARKDOWN_EXAMPLE, { outDir, index: false });
   assert.deepEqual(await readdir(outDir), ['spaghetti-with-anchovy-breadcrumbs.html']);
-  const html = await readFile(path.join(outDir, 'spaghetti-with-anchovy-breadcrumbs.html'), 'utf8');
-  assert.ok(!html.includes('href="index.html"'));
 });
 
 test('--title filters the export', async () => {
@@ -159,5 +165,5 @@ test('CLI writes cards to --out', async () => {
   const outDir = await tmp();
   const { io } = captureIo();
   assert.equal(await main([EXAMPLE, '-o', outDir, '--title', 'Creami', '-q'], io), 0);
-  assert.deepEqual(await readdir(outDir), ['ninja-creami-vanilla-bean-ice-cream.html']);
+  assert.deepEqual((await readdir(outDir)).sort(), ['index.html', 'ninja-creami-vanilla-bean-ice-cream.html']);
 });

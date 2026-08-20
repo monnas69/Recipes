@@ -1,0 +1,55 @@
+# Rebuild the recipe site from recipes/ and publish it to GitHub Pages.
+#
+# Enable once: Settings -> Pages -> Source: "GitHub Actions".
+# After that, adding a file to recipes/ and pushing is the whole workflow.
+name: Build and publish recipe cards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'recipes/**'
+      - 'src/**'
+      - 'bin/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a run finish before the next one starts; never cancel a publish midway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build the site
+        run: npm run site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

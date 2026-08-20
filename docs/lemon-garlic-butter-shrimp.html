@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Lemon Garlic Butter Shrimp</title>
+<meta name="description" content="One pan, fifteen minutes. The sauce is just butter, garlic and lemon, emulsified with a splash of the pasta water or stock.">
+<meta name="generator" content="ninja-recipe-card-exporter">
+<style>
+/* Ninja recipe card — self-contained styles. Light, dark and print. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #f7f5f1;
+  --surface: #ffffff;
+  --surface-alt: #f2efe9;
+  --text: #1e1b17;
+  --muted: #6d675d;
+  --border: #e4ded3;
+  --accent: #b1512a;
+  --accent-soft: #fbeee7;
+  --accent-text: #ffffff;
+  --done: #2f7d55;
+  --done-soft: #e8f4ed;
+  --warn: #a8641b;
+  --shadow: 0 1px 2px rgba(30, 27, 23, .06), 0 12px 32px rgba(30, 27, 23, .07);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14151a;
+    --surface: #1c1e24;
+    --surface-alt: #23262e;
+    --text: #ece9e3;
+    --muted: #a29c92;
+    --border: #303440;
+    --accent: #f08a5f;
+    --accent-soft: #33241d;
+    --accent-text: #1a1207;
+    --done: #67c48f;
+    --done-soft: #1d2f26;
+    --warn: #e0a95c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 40px rgba(0, 0, 0, .35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #14151a;
+  --surface: #1c1e24;
+  --surface-alt: #23262e;
+  --text: #ece9e3;
+  --muted: #a29c92;
+  --border: #303440;
+  --accent: #f08a5f;
+  --accent-soft: #33241d;
+  --accent-text: #1a1207;
+  --done: #67c48f;
+  --done-soft: #1d2f26;
+  --warn: #e0a95c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 40px rgba(0, 0, 0, .35);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 24px 16px 64px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+
+.card {
+  max-width: 46rem;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* ---------- header ---------- */
+
+.card-header { padding: 28px 28px 20px; border-bottom: 1px solid var(--border); }
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4.4vw, 2.4rem);
+  line-height: 1.15;
+  margin: 10px 0 0;
+  letter-spacing: -.01em;
+}
+
+.description { margin: 10px 0 0; color: var(--muted); font-size: 1rem; }
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.meta li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  font-size: 13px;
+}
+
+.meta .meta-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+
+/* ---------- toolbar ---------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 28px;
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.servings { display: flex; align-items: center; gap: 10px; flex: 1 1 260px; min-width: 240px; }
+.servings-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+.stepper { display: flex; align-items: center; gap: 6px; }
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  transition: background .15s ease, border-color .15s ease, transform .05s ease;
+}
+
+button:hover { border-color: var(--accent); }
+button:active { transform: translateY(1px); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.round { width: 34px; height: 34px; padding: 0; font-size: 18px; line-height: 1; border-radius: 50%; }
+
+.servings-value {
+  min-width: 4.5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+input[type="range"] {
+  flex: 1 1 auto;
+  min-width: 90px;
+  accent-color: var(--accent);
+  height: 24px;
+}
+
+.toolbar-actions { display: flex; gap: 8px; margin-left: auto; }
+
+.scale-note {
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.scale-note[hidden] { display: none; }
+
+/* ---------- sections ---------- */
+
+section { padding: 24px 28px; border-bottom: 1px solid var(--border); }
+section:last-of-type { border-bottom: 0; }
+
+h2 {
+  font-size: 13px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.progress-track {
+  flex: 1 1 auto;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.progress-bar { height: 100%; width: 0%; background: var(--done); transition: width .25s ease; }
+
+/* ---------- ingredients ---------- */
+
+.group-title {
+  margin: 18px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.group-title:first-child { margin-top: 0; }
+
+ul.list { list-style: none; margin: 0; padding: 0; }
+
+.ingredient {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.ingredient:last-child { border-bottom: 0; }
+
+.ingredient input[type="checkbox"],
+.step input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--done);
+  flex: none;
+  cursor: pointer;
+}
+
+.ingredient-body { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.ingredient-note { color: var(--muted); font-size: .92rem; }
+.ingredient.checked .ingredient-body { opacity: .45; text-decoration: line-through; }
+
+/* ---------- steps ---------- */
+
+.step {
+  display: flex;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px dashed var(--border);
+  break-inside: avoid;
+}
+.step:last-child { border-bottom: 0; }
+
+.step-index {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.step-main { flex: 1 1 auto; min-width: 0; }
+.step-title { font-weight: 650; margin: 0 0 4px; }
+.step-content { margin: 0; white-space: pre-wrap; }
+.step.checked .step-index { background: var(--done-soft); color: var(--done); }
+.step.checked .step-title, .step.checked .step-content { opacity: .5; }
+
+.timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  font-variant-numeric: tabular-nums;
+  font-size: .95rem;
+}
+
+.timer:hover { border-color: var(--accent); }
+.timer-icon { font-size: 1rem; line-height: 1; }
+.timer-time { font-weight: 650; min-width: 5.5ch; text-align: left; }
+.timer-hint { color: var(--muted); font-size: 12px; }
+
+.timer.running { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.timer.paused { border-color: var(--warn); color: var(--warn); }
+.timer.done {
+  border-color: var(--done);
+  background: var(--done-soft);
+  color: var(--done);
+  animation: pulse 1s ease-in-out 3;
+}
+
+.timer-reset {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(47, 125, 85, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(47, 125, 85, .18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timer.done { animation: none; }
+  * { transition: none !important; }
+}
+
+/* ---------- notes & footer ---------- */
+
+.notes { list-style: none; margin: 0; padding: 0; }
+.notes li {
+  position: relative;
+  padding: 6px 0 6px 22px;
+  color: var(--text);
+}
+.notes li::before {
+  content: "›";
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.card-footer {
+  padding: 18px 28px 24px;
+  color: var(--muted);
+  font-size: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  justify-content: space-between;
+  background: var(--surface-alt);
+}
+
+.card-footer a { color: inherit; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 560px) {
+  body { padding: 12px 10px 48px; }
+  .card-header, .toolbar, section, .card-footer { padding-left: 18px; padding-right: 18px; }
+  .toolbar { position: static; }
+  .toolbar-actions { margin-left: 0; }
+}
+
+/* ---------- print ---------- */
+
+@media print {
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --surface-alt: #fff;
+    --text: #000;
+    --muted: #444;
+    --border: #bbb;
+    --accent: #000;
+    --accent-soft: #fff;
+    --done: #000;
+    --shadow: none;
+  }
+  body { padding: 0; font-size: 11.5pt; }
+  .card { border: 0; box-shadow: none; max-width: none; }
+  .toolbar-actions, .timer-reset, input[type="range"], .stepper, .no-print { display: none !important; }
+  .toolbar { position: static; border-bottom: 1px solid #bbb; }
+  .servings-label::after { content: ""; }
+  .step, .ingredient { break-inside: avoid; }
+  h1 { font-size: 22pt; }
+  .timer { border: 1px solid #bbb; }
+  a[href]::after { content: ""; }
+}
+
+</style>
+</head>
+<body>
+<main class="card">
+  <header class="card-header">
+    <div class="eyebrow">
+      <span>Recipe card</span>
+      <a class="back-link" href="index.html">← All recipes</a>
+    </div>
+    <h1>Lemon Garlic Butter Shrimp</h1>
+    <p class="description">One pan, fifteen minutes. The sauce is just butter, garlic and lemon, emulsified with a splash of the pasta water or stock.</p>
+      <ul class="meta">
+        <li><span class="meta-label">Prep</span> 5 min</li>
+        <li><span class="meta-label">Cook</span> 10 min</li>
+        <li><span class="meta-label">Difficulty</span> Easy</li>
+        <li><span class="meta-label">Timers</span> 4</li>
+      </ul>
+  </header>
+
+  <div class="toolbar">
+    <div class="servings">
+      <span class="servings-label" id="servings-caption">Servings</span>
+      <div class="stepper">
+        <button type="button" class="round" id="servings-minus" aria-label="Fewer servings">−</button>
+        <span class="servings-value" id="servings-value" aria-live="polite">2</span>
+        <button type="button" class="round" id="servings-plus" aria-label="More servings">+</button>
+      </div>
+      <input type="range" id="servings-range" min="1" max="12" step="1" value="2" aria-labelledby="servings-caption">
+      <span class="scale-note" id="scale-note" hidden></span>
+    </div>
+    <div class="toolbar-actions no-print">
+      <button type="button" id="theme-toggle" class="round" aria-label="Toggle theme">◐</button>
+      <button type="button" id="reset-button" title="Reset servings, checkboxes and timers">Reset</button>
+      <button type="button" id="print-button">Print</button>
+    </div>
+  </div>
+
+  <section class="ingredients-section">
+    <h2>Ingredients <span class="sr-only">for <span id="servings-echo">2</span> servings</span></h2>
+      <ul class="list">
+        <li class="ingredient" data-ingredient data-index="0">
+          <input type="checkbox" id="ing-1" data-key="shrimp" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-1">
+            <span class="amount">450 g</span>
+            <span class="ingredient-name">large shrimp</span>
+            <span class="ingredient-note">(peeled and deveined)</span>
+          </label>
+        </li>
+        <li class="ingredient" data-ingredient data-index="1">
+          <input type="checkbox" id="ing-2" data-key="butter" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-2">
+            <span class="amount">3 tbsp</span>
+            <span class="ingredient-name">unsalted butter</span>
+            
+          </label>
+        </li>
+        <li class="ingredient" data-ingredient data-index="2">
+          <input type="checkbox" id="ing-3" data-key="oil" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-3">
+            <span class="amount">1 tbsp</span>
+            <span class="ingredient-name">olive oil</span>
+            
+          </label>
+        </li>
+        <li class="ingredient" data-ingredient data-index="3">
+          <input type="checkbox" id="ing-4" data-key="garlic" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-4">
+            <span class="amount">4 cloves</span>
+            <span class="ingredient-name">garlic</span>
+            <span class="ingredient-note">(thinly sliced)</span>
+          </label>
+        </li>
+        <li class="ingredient" data-ingredient data-index="4">
+          <input type="checkbox" id="ing-5" data-key="chilli" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-5">
+            <span class="amount">¼ tsp</span>
+            <span class="ingredient-name">chilli flakes</span>
+            
+          </label>
+        </li>
+        <li class="ingredient" data-ingredient data-index="5">
+          <input type="checkbox" id="ing-6" data-key="lemon" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-6">
+            <span class="amount">1</span>
+            <span class="ingredient-name">lemon</span>
+            <span class="ingredient-note">(juice and zest)</span>
+          </label>
+        </li>
+        <li class="ingredient" data-ingredient data-index="6">
+          <input type="checkbox" id="ing-7" data-key="parsley" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-7">
+            <span class="amount">2 tbsp</span>
+            <span class="ingredient-name">flat-leaf parsley</span>
+            <span class="ingredient-note">(chopped)</span>
+          </label>
+        </li>
+        <li class="ingredient" data-ingredient data-index="7">
+          <input type="checkbox" id="ing-8" data-key="salt" data-kind="ingredient">
+          <label class="ingredient-body" for="ing-8">
+            <span class="amount">to taste</span>
+            <span class="ingredient-name">salt and pepper</span>
+            
+          </label>
+        </li>
+      </ul>
+  </section>
+
+  <section class="steps-section">
+    <h2>Method</h2>
+    <div class="progress">
+      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Steps completed">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <span id="progress-label">0 of 5 steps done</span>
+    </div>
+      <ul class="list">
+        <li class="step">
+          <span class="step-index" aria-hidden="true">1</span>
+          <div class="step-main">
+            <p class="step-title">Dry and season</p>
+            <p class="step-content">Pat the shrimp completely dry and season with salt and pepper. Wet shrimp steam instead of searing.</p>
+            <div class="timer-wrap">
+              <button type="button" class="timer" data-timer="step-1" data-seconds="120" data-step="1" aria-label="Step 1 timer, 2 min, tap to start">
+                <span class="timer-icon" aria-hidden="true">⏱</span>
+                <span class="timer-time">2:00</span>
+                <span class="timer-hint">tap to start</span>
+              </button>
+              <button type="button" class="timer-reset no-print" data-timer-reset="step-1" hidden>reset</button>
+            </div>
+          </div>
+          <input type="checkbox" id="step-1-check" data-key="step-1" data-kind="step" aria-label="Mark step 1 done">
+        </li>
+        <li class="step">
+          <span class="step-index" aria-hidden="true">2</span>
+          <div class="step-main">
+            <p class="step-title">Sear</p>
+            <p class="step-content">Heat the oil in a wide pan over high heat. Lay the shrimp in a single layer and leave them alone until the undersides turn opaque and pink.</p>
+            <div class="timer-wrap">
+              <button type="button" class="timer" data-timer="step-2" data-seconds="90" data-step="2" aria-label="Step 2 timer, 1 min 30 sec, tap to start">
+                <span class="timer-icon" aria-hidden="true">⏱</span>
+                <span class="timer-time">1:30</span>
+                <span class="timer-hint">tap to start</span>
+              </button>
+              <button type="button" class="timer-reset no-print" data-timer-reset="step-2" hidden>reset</button>
+            </div>
+          </div>
+          <input type="checkbox" id="step-2-check" data-key="step-2" data-kind="step" aria-label="Mark step 2 done">
+        </li>
+        <li class="step">
+          <span class="step-index" aria-hidden="true">3</span>
+          <div class="step-main">
+            <p class="step-title">Flip and remove</p>
+            <p class="step-content">Flip, count to thirty, then tip the shrimp onto a plate. They will finish in the sauce, so slightly under is right.</p>
+            <div class="timer-wrap">
+              <button type="button" class="timer" data-timer="step-3" data-seconds="30" data-step="3" aria-label="Step 3 timer, 30 sec, tap to start">
+                <span class="timer-icon" aria-hidden="true">⏱</span>
+                <span class="timer-time">0:30</span>
+                <span class="timer-hint">tap to start</span>
+              </button>
+              <button type="button" class="timer-reset no-print" data-timer-reset="step-3" hidden>reset</button>
+            </div>
+          </div>
+          <input type="checkbox" id="step-3-check" data-key="step-3" data-kind="step" aria-label="Mark step 3 done">
+        </li>
+        <li class="step">
+          <span class="step-index" aria-hidden="true">4</span>
+          <div class="step-main">
+            <p class="step-title">Build the sauce</p>
+            <p class="step-content">Drop the heat to medium. Add the butter, garlic and chilli flakes and swirl until the garlic is fragrant and pale gold — do not let it brown.</p>
+            <div class="timer-wrap">
+              <button type="button" class="timer" data-timer="step-4" data-seconds="60" data-step="4" aria-label="Step 4 timer, 1 min, tap to start">
+                <span class="timer-icon" aria-hidden="true">⏱</span>
+                <span class="timer-time">1:00</span>
+                <span class="timer-hint">tap to start</span>
+              </button>
+              <button type="button" class="timer-reset no-print" data-timer-reset="step-4" hidden>reset</button>
+            </div>
+          </div>
+          <input type="checkbox" id="step-4-check" data-key="step-4" data-kind="step" aria-label="Mark step 4 done">
+        </li>
+        <li class="step">
+          <span class="step-index" aria-hidden="true">5</span>
+          <div class="step-main">
+            <p class="step-title">Finish</p>
+            <p class="step-content">Off the heat, add the lemon juice and zest and swirl until the sauce turns glossy. Return the shrimp and any juices, fold through the parsley, and serve straight away.</p>
+          </div>
+          <input type="checkbox" id="step-5-check" data-key="step-5" data-kind="step" aria-label="Mark step 5 done">
+        </li>
+      </ul>
+  </section>
+
+    <section class="notes-section">
+      <h2>Notes</h2>
+      <ul class="notes">
+        <li>A splash of pasta water or stock will rescue a sauce that splits.</li>
+        <li>Frozen shrimp work if you thaw them fully and dry them twice.</li>
+      </ul>
+    </section>
+
+  <footer class="card-footer">
+    <span>Exported 2026-08-20 with ninja-recipe-card-exporter</span>
+    <span>Source: recipes</span>
+  </footer>
+</main>
+
+<p class="sr-only" id="timer-live" role="status" aria-live="assertive"></p>
+
+<script type="application/json" id="recipe-json">{"title":"Lemon Garlic Butter Shrimp","slug":"lemon-garlic-butter-shrimp","description":"One pan, fifteen minutes. The sauce is just butter, garlic and lemon, emulsified with a splash of the pasta water or stock.","exported_at":"2026-08-20T23:46:49.082Z","base_servings":2,"servings_unit":"servings","ingredients":[{"id":"shrimp","name":"large shrimp","amount":450,"amount_max":null,"amount_text":"","unit":"g","note":"peeled and deveined","group":"","scalable":true},{"id":"butter","name":"unsalted butter","amount":3,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","group":"","scalable":true},{"id":"oil","name":"olive oil","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","group":"","scalable":true},{"id":"garlic","name":"garlic","amount":4,"amount_max":null,"amount_text":"","unit":"cloves","note":"thinly sliced","group":"","scalable":true},{"id":"chilli","name":"chilli flakes","amount":0.25,"amount_max":null,"amount_text":"","unit":"tsp","note":"","group":"","scalable":true},{"id":"lemon","name":"lemon","amount":1,"amount_max":null,"amount_text":"","unit":"","note":"juice and zest","group":"","scalable":true},{"id":"parsley","name":"flat-leaf parsley","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"chopped","group":"","scalable":true},{"id":"salt","name":"salt and pepper","amount":null,"amount_max":null,"amount_text":"to taste","unit":"","note":"","group":"","scalable":false}],"steps":[{"id":"step-1","title":"Dry and season","content":"Pat the shrimp completely dry and season with salt and pepper. Wet shrimp steam instead of searing.","timer_seconds":120,"number":1},{"id":"step-2","title":"Sear","content":"Heat the oil in a wide pan over high heat. Lay the shrimp in a single layer and leave them alone until the undersides turn opaque and pink.","timer_seconds":90,"number":2},{"id":"step-3","title":"Flip and remove","content":"Flip, count to thirty, then tip the shrimp onto a plate. They will finish in the sauce, so slightly under is right.","timer_seconds":30,"number":3},{"id":"step-4","title":"Build the sauce","content":"Drop the heat to medium. Add the butter, garlic and chilli flakes and swirl until the garlic is fragrant and pale gold — do not let it brown.","timer_seconds":60,"number":4},{"id":"step-5","title":"Finish","content":"Off the heat, add the lemon juice and zest and swirl until the sauce turns glossy. Return the shrimp and any juices, fold through the parsley, and serve straight away.","timer_seconds":null,"number":5}],"notes":["A splash of pasta water or stock will rescue a sauce that splits.","Frozen shrimp work if you thaw them fully and dry them twice."],"meta":{"prep_time":"5 min","cook_time":"10 min","difficulty":"Easy"}}</script>
+<script>
+try {
+  window.RECIPE_DATA = JSON.parse(document.getElementById('recipe-json').textContent);
+} catch (err) {
+  window.RECIPE_DATA = null;
+}
+</script>
+<script>
+/**
+ * Amount / duration formatting shared by the CLI and the exported cards.
+ *
+ * This file is imported normally by the Node code AND inlined verbatim into
+ * every exported HTML card (with the `export ` keywords stripped), so the
+ * numbers a card shows in the browser always match what the CLI computes.
+ * Keep it dependency-free and ES5-friendly in its runtime behaviour.
+ */
+
+/** Units that read better as decimals than as kitchen fractions. */
+const DECIMAL_UNITS = [
+  'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms',
+  'mg', 'ml', 'milliliter', 'milliliters', 'millilitre', 'millilitres',
+  'l', 'liter', 'liters', 'litre', 'litres', 'dl', 'cl',
+  'oz', 'ounce', 'ounces', 'floz', 'fl oz', 'fluid ounce', 'fluid ounces',
+  'lb', 'lbs', 'pound', 'pounds', 'kcal', 'cal', 'c', 'f', 'celsius', 'fahrenheit'
+];
+
+const VULGAR = {
+  '1/2': '½',
+  '1/3': '⅓',
+  '2/3': '⅔',
+  '1/4': '¼',
+  '3/4': '¾',
+  '1/8': '⅛',
+  '3/8': '⅜',
+  '5/8': '⅝',
+  '7/8': '⅞'
+};
+
+/** True when the unit should be rendered with decimals rather than fractions. */
+function isDecimalUnit(unit) {
+  if (!unit) return false;
+  return DECIMAL_UNITS.indexOf(String(unit).trim().toLowerCase()) !== -1;
+}
+
+/** Round to `places` decimals and drop trailing zeroes. */
+function trimNumber(value, places) {
+  const rounded = Number(value.toFixed(places));
+  return String(rounded);
+}
+
+/** Decimal presentation: coarser as the number grows, so scaling stays sane. */
+function formatDecimal(value) {
+  const abs = Math.abs(value);
+  if (abs >= 100) return trimNumber(value, 0);
+  if (abs >= 10) return trimNumber(value, 1);
+  if (abs >= 1) return trimNumber(value, 2);
+  return trimNumber(value, 2);
+}
+
+/**
+ * Format a scaled amount. Kitchen units snap to familiar fractions
+ * (1.5 -> 1½, 0.333 -> ⅓); weights and volumes stay decimal.
+ */
+function formatAmount(value, unit) {
+  if (typeof value !== 'number' || !isFinite(value)) return '';
+  if (value === 0) return '0';
+  const negative = value < 0;
+  const abs = Math.abs(value);
+  let out;
+  if (isDecimalUnit(unit)) {
+    out = formatDecimal(abs);
+  } else {
+    out = formatFraction(abs);
+  }
+  return negative ? '-' + out : out;
+}
+
+/** Snap to the nearest common kitchen fraction, or fall back to decimals. */
+function formatFraction(abs) {
+  const whole = Math.floor(abs + 1e-9);
+  const remainder = abs - whole;
+  if (remainder < 0.02) return String(whole);
+  const denominators = [2, 3, 4, 8];
+  for (let i = 0; i < denominators.length; i += 1) {
+    const den = denominators[i];
+    const num = Math.round(remainder * den);
+    if (num <= 0 || num >= den) continue;
+    if (Math.abs(remainder - num / den) <= 0.021) {
+      const key = num + '/' + den;
+      const glyph = VULGAR[key] || key;
+      return whole > 0 ? whole + glyph : glyph;
+    }
+  }
+  return formatDecimal(abs);
+}
+
+/**
+ * Full amount text for an ingredient at a given scale factor.
+ * Handles ranges ("2-3 cloves") and non-numeric amounts ("to taste").
+ */
+function scaledAmountText(ingredient, factor) {
+  if (typeof ingredient.amount !== 'number' || !isFinite(ingredient.amount)) {
+    return ingredient.amount_text || '';
+  }
+  const unit = ingredient.unit || '';
+  const low = formatAmount(ingredient.amount * factor, unit);
+  if (typeof ingredient.amount_max === 'number' && isFinite(ingredient.amount_max)) {
+    const high = formatAmount(ingredient.amount_max * factor, unit);
+    if (high && high !== low) return low + '–' + high;
+  }
+  return low;
+}
+
+/** Seconds -> clock display, e.g. 90 -> "1:30", 3725 -> "1:02:05". */
+function formatClock(totalSeconds) {
+  const seconds = Math.max(0, Math.round(totalSeconds));
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const pad = function (n) { return n < 10 ? '0' + n : String(n); };
+  if (hrs > 0) return hrs + ':' + pad(mins) + ':' + pad(secs);
+  return mins + ':' + pad(secs);
+}
+
+/** Seconds -> human label, e.g. 90 -> "1 min 30 sec". */
+function formatDuration(totalSeconds) {
+  const seconds = Math.max(0, Math.round(totalSeconds));
+  if (seconds === 0) return '0 sec';
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const parts = [];
+  if (hrs) parts.push(hrs + ' hr');
+  if (mins) parts.push(mins + ' min');
+  if (secs) parts.push(secs + ' sec');
+  return parts.join(' ');
+}
+
+/** Word units that read wrong when the scaled amount stops being singular. */
+const COUNTABLE_UNITS = [
+  'cup', 'clove', 'slice', 'stick', 'sprig', 'pinch', 'dash', 'can', 'packet',
+  'package', 'scoop', 'handful', 'bunch', 'tablespoon', 'teaspoon', 'ounce',
+  'pound', 'quart', 'pint', 'gallon', 'liter', 'litre', 'gram', 'kilogram',
+  'head', 'ear', 'rib', 'strip', 'fillet', 'sheet', 'piece', 'bulb', 'stalk',
+  'leaf', 'wedge', 'square', 'drop', 'knob', 'jar', 'bottle', 'tin', 'bag', 'box'
+];
+
+const IRREGULAR_PLURALS = { leaf: 'leaves' };
+
+/**
+ * Agree a unit with its (scaled) amount: 1 cup / 2 cups, 3 cloves / 1 clove.
+ * Abbreviations (tsp, tbsp, g, ml) and unknown units are left untouched.
+ */
+function formatUnit(unit, value) {
+  const raw = String(unit || '').trim();
+  if (!raw) return '';
+  const lower = raw.toLowerCase();
+  const candidates = [lower, lower.replace(/s$/, ''), lower.replace(/es$/, ''), lower.replace(/ves$/, 'f')];
+  let base = null;
+  for (let i = 0; i < candidates.length; i += 1) {
+    if (COUNTABLE_UNITS.indexOf(candidates[i]) !== -1) { base = candidates[i]; break; }
+  }
+  if (!base) return raw;
+
+  const plural = IRREGULAR_PLURALS[base] || (/(?:ch|sh|s|x|z)$/.test(base) ? base + 'es' : base + 's');
+  // Recipes write "1 cup" and "½ cup", but "2 cups" — anything at or under one
+  // portion stays singular.
+  const wantsPlural = !(typeof value === 'number' && value > 0 && value <= 1 + 1e-9);
+  const agreed = wantsPlural ? plural : base;
+  // Preserve the capitalisation the recipe used.
+  return raw[0] === raw[0].toUpperCase() && raw[0] !== raw[0].toLowerCase()
+    ? agreed.charAt(0).toUpperCase() + agreed.slice(1)
+    : agreed;
+}
+
+/** Amount + agreed unit, e.g. "2 cups" / "1 cup" / "180 g". */
+function scaledAmountWithUnit(ingredient, factor) {
+  const amount = scaledAmountText(ingredient, factor);
+  if (typeof ingredient.amount !== 'number' || !isFinite(ingredient.amount)) {
+    const staticUnit = ingredient.unit ? ' ' + ingredient.unit : '';
+    return amount ? amount + staticUnit : '';
+  }
+  const scaled = ingredient.amount * factor;
+  const unit = formatUnit(ingredient.unit, ingredient.amount_max ? null : scaled);
+  return unit ? amount + ' ' + unit : amount;
+}
+
+/**
+ * Runtime for an exported recipe card.
+ *
+ * Inlined into the HTML together with format.js (whose helpers — formatAmount,
+ * scaledAmountWithUnit, formatClock, formatDuration — are in scope here). Reads the
+ * recipe from window.RECIPE_DATA. No dependencies, no network.
+ */
+(function () {
+  'use strict';
+
+  var recipe = window.RECIPE_DATA;
+  if (!recipe) return;
+
+  var storeKey = 'ninja-recipe:' + (recipe.slug || 'card');
+  var state = { servings: recipe.base_servings, ingredients: {}, steps: {}, theme: 'auto' };
+  var timers = {};
+  var audioCtx = null;
+
+  /* ---------------- persistence ---------------- */
+
+  function loadState() {
+    try {
+      var stored = window.localStorage.getItem(storeKey);
+      if (!stored) return;
+      var parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object') {
+        if (typeof parsed.servings === 'number' && parsed.servings > 0) state.servings = parsed.servings;
+        state.ingredients = parsed.ingredients || {};
+        state.steps = parsed.steps || {};
+        if (parsed.theme) state.theme = parsed.theme;
+      }
+    } catch (err) { /* private mode, blocked storage: fall back to defaults */ }
+  }
+
+  function saveState() {
+    try {
+      window.localStorage.setItem(storeKey, JSON.stringify(state));
+    } catch (err) { /* nothing to do — the card still works in-memory */ }
+  }
+
+  /* ---------------- scaling ---------------- */
+
+  function factor() {
+    var base = recipe.base_servings || 1;
+    return state.servings / base;
+  }
+
+  function renderAmounts() {
+    var f = factor();
+    var nodes = document.querySelectorAll('[data-ingredient]');
+    for (var i = 0; i < nodes.length; i += 1) {
+      var node = nodes[i];
+      var ingredient = recipe.ingredients[Number(node.getAttribute('data-index'))];
+      if (!ingredient) continue;
+      var amountEl = node.querySelector('.amount');
+      if (!amountEl) continue;
+      amountEl.textContent = ingredient.scalable
+        ? scaledAmountWithUnit(ingredient, f)
+        : [ingredient.amount_text, ingredient.unit].filter(Boolean).join(' ');
+    }
+
+    var value = document.getElementById('servings-value');
+    if (value) value.textContent = String(state.servings);
+    var range = document.getElementById('servings-range');
+    if (range && Number(range.value) !== state.servings) range.value = String(state.servings);
+
+    var echo = document.getElementById('servings-echo');
+    if (echo) echo.textContent = String(state.servings);
+
+    var note = document.getElementById('scale-note');
+    if (note) {
+      var scaled = state.servings !== recipe.base_servings;
+      note.hidden = !scaled;
+      if (scaled) {
+        note.textContent = 'scaled ' + formatAmount(f, '') + '× from ' + recipe.base_servings;
+      }
+    }
+  }
+
+  function setServings(next) {
+    var value = Math.max(1, Math.min(99, Math.round(next)));
+    if (value === state.servings) return;
+    state.servings = value;
+    renderAmounts();
+    saveState();
+  }
+
+  /* ---------------- checklists ---------------- */
+
+  function applyChecks() {
+    var boxes = document.querySelectorAll('input[type="checkbox"][data-key]');
+    for (var i = 0; i < boxes.length; i += 1) {
+      var box = boxes[i];
+      var bucket = box.getAttribute('data-kind') === 'step' ? state.steps : state.ingredients;
+      var checked = Boolean(bucket[box.getAttribute('data-key')]);
+      box.checked = checked;
+      var row = box.closest('.ingredient, .step');
+      if (row) row.classList.toggle('checked', checked);
+    }
+    renderProgress();
+  }
+
+  function renderProgress() {
+    var total = recipe.steps.length;
+    var done = 0;
+    for (var key in state.steps) {
+      if (Object.prototype.hasOwnProperty.call(state.steps, key) && state.steps[key]) done += 1;
+    }
+    var bar = document.getElementById('progress-bar');
+    var label = document.getElementById('progress-label');
+    var percent = total ? Math.round((done / total) * 100) : 0;
+    if (bar) {
+      bar.style.width = percent + '%';
+      bar.parentNode.setAttribute('aria-valuenow', String(percent));
+    }
+    if (label) label.textContent = done + ' of ' + total + ' steps done';
+  }
+
+  function onCheckboxChange(event) {
+    var box = event.target;
+    if (!box || box.type !== 'checkbox' || !box.getAttribute('data-key')) return;
+    var bucket = box.getAttribute('data-kind') === 'step' ? state.steps : state.ingredients;
+    bucket[box.getAttribute('data-key')] = box.checked;
+    var row = box.closest('.ingredient, .step');
+    if (row) row.classList.toggle('checked', box.checked);
+    renderProgress();
+    saveState();
+  }
+
+  /* ---------------- timers ---------------- */
+
+  function beep() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      audioCtx = audioCtx || new Ctx();
+      if (audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume();
+      var now = audioCtx.currentTime;
+      for (var i = 0; i < 3; i += 1) {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.0001, now + i * 0.45);
+        gain.gain.exponentialRampToValueAtTime(0.25, now + i * 0.45 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.45 + 0.32);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now + i * 0.45);
+        osc.stop(now + i * 0.45 + 0.35);
+      }
+    } catch (err) { /* audio is a nicety, never a requirement */ }
+  }
+
+  function paintTimer(timer) {
+    var el = timer.el;
+    var remaining = Math.max(0, Math.ceil(timer.remaining));
+    el.querySelector('.timer-time').textContent = formatClock(remaining);
+    var hint = el.querySelector('.timer-hint');
+    el.classList.toggle('running', timer.status === 'running');
+    el.classList.toggle('paused', timer.status === 'paused');
+    el.classList.toggle('done', timer.status === 'done');
+    el.querySelector('.timer-icon').textContent =
+      timer.status === 'running' ? '⏸' : (timer.status === 'done' ? '✓' : '⏱');
+    if (hint) {
+      hint.textContent = timer.status === 'running' ? 'tap to pause'
+        : timer.status === 'paused' ? 'tap to resume'
+        : timer.status === 'done' ? 'time!' : 'tap to start';
+    }
+    var reset = el.parentNode.querySelector('.timer-reset');
+    if (reset) reset.hidden = timer.status === 'idle';
+    el.setAttribute('aria-label', 'Step ' + timer.step + ' timer, ' + formatClock(remaining) + ' remaining, ' + timer.status);
+  }
+
+  function tick(timer) {
+    if (timer.status !== 'running') return;
+    var now = Date.now();
+    timer.remaining = Math.max(0, (timer.endsAt - now) / 1000);
+    if (timer.remaining <= 0) {
+      timer.status = 'done';
+      timer.remaining = 0;
+      window.clearInterval(timer.handle);
+      timer.handle = null;
+      paintTimer(timer);
+      finish(timer);
+      return;
+    }
+    paintTimer(timer);
+    updateTitle();
+  }
+
+  function finish(timer) {
+    beep();
+    if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch (err) {} }
+    var live = document.getElementById('timer-live');
+    if (live) live.textContent = 'Timer finished for step ' + timer.step + '.';
+    updateTitle();
+  }
+
+  function updateTitle() {
+    var active = null;
+    for (var id in timers) {
+      if (timers[id].status === 'running') {
+        if (!active || timers[id].remaining < active.remaining) active = timers[id];
+      }
+    }
+    var base = recipe.title;
+    document.title = active ? formatClock(active.remaining) + ' · ' + base : base;
+  }
+
+  function toggleTimer(el) {
+    var id = el.getAttribute('data-timer');
+    var seconds = Number(el.getAttribute('data-seconds'));
+    var timer = timers[id];
+    if (!timer) {
+      timer = timers[id] = {
+        el: el,
+        total: seconds,
+        remaining: seconds,
+        status: 'idle',
+        handle: null,
+        endsAt: 0,
+        step: el.getAttribute('data-step') || id
+      };
+    }
+    if (timer.status === 'running') {
+      timer.status = 'paused';
+      timer.remaining = Math.max(0, (timer.endsAt - Date.now()) / 1000);
+      window.clearInterval(timer.handle);
+      timer.handle = null;
+    } else {
+      if (timer.status === 'done') timer.remaining = timer.total;
+      timer.status = 'running';
+      timer.endsAt = Date.now() + timer.remaining * 1000;
+      window.clearInterval(timer.handle);
+      timer.handle = window.setInterval(function () { tick(timer); }, 250);
+      beepUnlock();
+    }
+    paintTimer(timer);
+    updateTitle();
+  }
+
+  // Browsers need a user gesture before audio can play; warm the context here.
+  function beepUnlock() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      audioCtx = audioCtx || new Ctx();
+      if (audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume();
+    } catch (err) {}
+  }
+
+  function resetTimer(el) {
+    var id = el.getAttribute('data-timer-reset');
+    var timer = timers[id];
+    if (!timer) return;
+    window.clearInterval(timer.handle);
+    timer.handle = null;
+    timer.status = 'idle';
+    timer.remaining = timer.total;
+    paintTimer(timer);
+    updateTitle();
+  }
+
+  /* ---------------- theme ---------------- */
+
+  function applyTheme() {
+    var root = document.documentElement;
+    if (state.theme === 'auto') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', state.theme);
+    var button = document.getElementById('theme-toggle');
+    if (button) {
+      var icon = state.theme === 'dark' ? '☾' : state.theme === 'light' ? '☀' : '◐';
+      button.textContent = icon;
+      button.setAttribute('aria-label', 'Theme: ' + state.theme + '. Click to change.');
+      button.title = 'Theme: ' + state.theme;
+    }
+  }
+
+  function cycleTheme() {
+    state.theme = state.theme === 'auto' ? 'light' : state.theme === 'light' ? 'dark' : 'auto';
+    applyTheme();
+    saveState();
+  }
+
+  /* ---------------- wiring ---------------- */
+
+  function resetAll() {
+    state.servings = recipe.base_servings;
+    state.ingredients = {};
+    state.steps = {};
+    for (var id in timers) {
+      window.clearInterval(timers[id].handle);
+      timers[id].handle = null;
+      timers[id].status = 'idle';
+      timers[id].remaining = timers[id].total;
+      paintTimer(timers[id]);
+    }
+    renderAmounts();
+    applyChecks();
+    updateTitle();
+    saveState();
+  }
+
+  function init() {
+    loadState();
+    applyTheme();
+    renderAmounts();
+    applyChecks();
+
+    document.addEventListener('change', onCheckboxChange);
+
+    document.addEventListener('click', function (event) {
+      var timerEl = event.target.closest ? event.target.closest('[data-timer]') : null;
+      if (timerEl) { toggleTimer(timerEl); return; }
+      var resetEl = event.target.closest ? event.target.closest('[data-timer-reset]') : null;
+      if (resetEl) { resetTimer(resetEl); return; }
+    });
+
+    var minus = document.getElementById('servings-minus');
+    var plus = document.getElementById('servings-plus');
+    var range = document.getElementById('servings-range');
+    if (minus) minus.addEventListener('click', function () { setServings(state.servings - 1); });
+    if (plus) plus.addEventListener('click', function () { setServings(state.servings + 1); });
+    if (range) range.addEventListener('input', function () { setServings(Number(range.value)); });
+
+    var printBtn = document.getElementById('print-button');
+    if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
+
+    var themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) themeBtn.addEventListener('click', cycleTheme);
+
+    var resetBtn = document.getElementById('reset-button');
+    if (resetBtn) resetBtn.addEventListener('click', resetAll);
+
+    // Keep timers honest after the tab has been backgrounded or the device slept.
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) return;
+      for (var id in timers) if (timers[id].status === 'running') tick(timers[id]);
+    });
+
+    window.addEventListener('beforeprint', function () {
+      document.documentElement.setAttribute('data-printing', 'true');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Recipe","name":"Lemon Garlic Butter Shrimp","description":"One pan, fifteen minutes. The sauce is just butter, garlic and lemon, emulsified with a splash of the pasta water or stock.","recipeYield":"2 servings","recipeIngredient":["450 g large shrimp","3 tbsp unsalted butter","1 tbsp olive oil","4 cloves garlic","¼ tsp chilli flakes","1 lemon","2 tbsp flat-leaf parsley","to taste salt and pepper"],"recipeInstructions":[{"@type":"HowToStep","name":"Dry and season","text":"Pat the shrimp completely dry and season with salt and pepper. Wet shrimp steam instead of searing."},{"@type":"HowToStep","name":"Sear","text":"Heat the oil in a wide pan over high heat. Lay the shrimp in a single layer and leave them alone until the undersides turn opaque and pink."},{"@type":"HowToStep","name":"Flip and remove","text":"Flip, count to thirty, then tip the shrimp onto a plate. They will finish in the sauce, so slightly under is right."},{"@type":"HowToStep","name":"Build the sauce","text":"Drop the heat to medium. Add the butter, garlic and chilli flakes and swirl until the garlic is fragrant and pale gold — do not let it brown."},{"@type":"HowToStep","name":"Finish","text":"Off the heat, add the lemon juice and zest and swirl until the sauce turns glossy. Return the shrimp and any juices, fold through the parsley, and serve straight away."}]}</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{
+  "uuid": "8f1c0e34-6d9a-4f21-b0f7-2c3d5e7a9b10",
+  "name": "Ninja recipes for the week",
+  "created_at": "2026-08-12T18:04:11.000Z",
+  "chat_messages": [
+    {
+      "uuid": "m1",
+      "sender": "human",
+      "created_at": "2026-08-12T18:04:11.000Z",
+      "text": "Give me a Ninja Creami vanilla base as a recipe card, with timers on each step.",
+      "content": [
+        {
+          "type": "text",
+          "text": "Give me a Ninja Creami vanilla base as a recipe card, with timers on each step."
+        }
+      ]
+    },
+    {
+      "uuid": "m2",
+      "sender": "assistant",
+      "created_at": "2026-08-12T18:04:29.000Z",
+      "text": "Here's the base I use most — it spins glossy every time.\n\n```recipe-card\n{\n  \"title\": \"Ninja Creami Vanilla Bean Ice Cream\",\n  \"description\": \"A creamy, no-churn base built for the Creami's spin cycle \\u2014 freeze it flat, spin it twice, and it comes out like gelato.\",\n  \"base_servings\": 4,\n  \"prep_time\": \"10 min\",\n  \"total_time\": \"24 hr (mostly freezing)\",\n  \"difficulty\": \"Easy\",\n  \"equipment\": \"Ninja Creami\",\n  \"ingredients\": [\n    {\n      \"id\": \"cream\",\n      \"name\": \"heavy cream\",\n      \"amount\": 1,\n      \"unit\": \"cup\"\n    },\n    {\n      \"id\": \"milk\",\n      \"name\": \"whole milk\",\n      \"amount\": \"1 1/2\",\n      \"unit\": \"cups\"\n    },\n    {\n      \"id\": \"sugar\",\n      \"name\": \"granulated sugar\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\"\n    },\n    {\n      \"id\": \"vanilla\",\n      \"name\": \"vanilla bean paste\",\n      \"amount\": 2,\n      \"unit\": \"tsp\"\n    },\n    {\n      \"id\": \"cheese\",\n      \"name\": \"cream cheese\",\n      \"amount\": 2,\n      \"unit\": \"tbsp\",\n      \"note\": \"softened\"\n    },\n    {\n      \"id\": \"salt\",\n      \"name\": \"fine sea salt\",\n      \"amount\": \"a pinch\"\n    }\n  ],\n  \"steps\": [\n    {\n      \"title\": \"Whisk the base\",\n      \"content\": \"Beat the softened cream cheese smooth, then whisk in the sugar, milk, cream, vanilla and salt until no grains remain.\",\n      \"timer_seconds\": 120\n    },\n    {\n      \"title\": \"Freeze flat\",\n      \"content\": \"Pour into the Creami pint, level it, lid on, and freeze on a flat shelf for a full 24 hours.\",\n      \"timer_seconds\": 86400\n    },\n    {\n      \"title\": \"First spin\",\n      \"content\": \"Run the ICE CREAM program. It will look crumbly and powdery \\u2014 that is expected.\",\n      \"timer_seconds\": 180\n    },\n    {\n      \"title\": \"Re-spin\",\n      \"content\": \"Add 1 tbsp milk and run RE-SPIN until it turns glossy and scoopable.\",\n      \"timer_seconds\": 120\n    },\n    {\n      \"title\": \"Serve\",\n      \"content\": \"Scoop immediately, or firm up in the freezer for 20 minutes for a denser scoop.\"\n    }\n  ],\n  \"notes\": [\n    \"Cream cheese is the stabiliser \\u2014 skip it and you get icy shards.\",\n    \"If the pint is domed after freezing, let it sit 3 minutes before spinning or the blade will stall.\"\n  ]\n}\n```\n\nFreeze it flat and give it a full 24 hours before the first spin.",
+      "content": [
+        {
+          "type": "text",
+          "text": "Here's the base I use most.\n\n```recipe-card\n{\n  \"title\": \"Ninja Creami Vanilla Bean Ice Cream\",\n  \"description\": \"A creamy, no-churn base built for the Creami's spin cycle \\u2014 freeze it flat, spin it twice, and it comes out like gelato.\",\n  \"base_servings\": 4,\n  \"prep_time\": \"10 min\",\n  \"total_time\": \"24 hr (mostly freezing)\",\n  \"difficulty\": \"Easy\",\n  \"equipment\": \"Ninja Creami\",\n  \"ingredients\": [\n    {\n      \"id\": \"cream\",\n      \"name\": \"heavy cream\",\n      \"amount\": 1,\n      \"unit\": \"cup\"\n    },\n    {\n      \"id\": \"milk\",\n      \"name\": \"whole milk\",\n      \"amount\": \"1 1/2\",\n      \"unit\": \"cups\"\n    },\n    {\n      \"id\": \"sugar\",\n      \"name\": \"granulated sugar\",\n      \"amount\": 0.5,\n      \"unit\": \"cup\"\n    },\n    {\n      \"id\": \"vanilla\",\n      \"name\": \"vanilla bean paste\",\n      \"amount\": 2,\n      \"unit\": \"tsp\"\n    },\n    {\n      \"id\": \"cheese\",\n      \"name\": \"cream cheese\",\n      \"amount\": 2,\n      \"unit\": \"tbsp\",\n      \"note\": \"softened\"\n    },\n    {\n      \"id\": \"salt\",\n      \"name\": \"fine sea salt\",\n      \"amount\": \"a pinch\"\n    }\n  ],\n  \"steps\": [\n    {\n      \"title\": \"Whisk the base\",\n      \"content\": \"Beat the softened cream cheese smooth, then whisk in the sugar, milk, cream, vanilla and salt until no grains remain.\",\n      \"timer_seconds\": 120\n    },\n    {\n      \"title\": \"Freeze flat\",\n      \"content\": \"Pour into the Creami pint, level it, lid on, and freeze on a flat shelf for a full 24 hours.\",\n      \"timer_seconds\": 86400\n    },\n    {\n      \"title\": \"First spin\",\n      \"content\": \"Run the ICE CREAM program. It will look crumbly and powdery \\u2014 that is expected.\",\n      \"timer_seconds\": 180\n    },\n    {\n      \"title\": \"Re-spin\",\n      \"content\": \"Add 1 tbsp milk and run RE-SPIN until it turns glossy and scoopable.\",\n      \"timer_seconds\": 120\n    },\n    {\n      \"title\": \"Serve\",\n      \"content\": \"Scoop immediately, or firm up in the freezer for 20 minutes for a denser scoop.\"\n    }\n  ],\n  \"notes\": [\n    \"Cream cheese is the stabiliser \\u2014 skip it and you get icy shards.\",\n    \"If the pint is domed after freezing, let it sit 3 minutes before spinning or the blade will stall.\"\n  ]\n}\n```"
+        }
+      ]
+    },
+    {
+      "uuid": "m3",
+      "sender": "human",
+      "created_at": "2026-08-12T18:09:02.000Z",
+      "text": "Now something savoury for the Foodi.",
+      "content": [
+        {
+          "type": "text",
+          "text": "Now something savoury for the Foodi."
+        }
+      ]
+    },
+    {
+      "uuid": "m4",
+      "sender": "assistant",
+      "created_at": "2026-08-12T18:09:40.000Z",
+      "text": "Sticky chilli thighs it is.",
+      "content": [
+        {
+          "type": "text",
+          "text": "Sticky chilli thighs it is."
+        },
+        {
+          "type": "tool_use",
+          "name": "artifacts",
+          "input": {
+            "command": "create",
+            "id": "foodi-chilli-chicken",
+            "type": "application/json",
+            "title": "Crispy chilli chicken thighs",
+            "content": "{\n  \"title\": \"Ninja Foodi Crispy Chilli Chicken Thighs\",\n  \"description\": \"Air-fried thighs with a sticky chilli glaze. Skin stays shatter-crisp because the glaze goes on at the end.\",\n  \"servings\": 2,\n  \"prep_time\": \"15 min\",\n  \"cook_time\": \"22 min\",\n  \"cuisine\": \"Fusion\",\n  \"ingredients\": [\n    {\n      \"name\": \"bone-in chicken thighs\",\n      \"amount\": 4,\n      \"unit\": \"\",\n      \"note\": \"skin on\"\n    },\n    {\n      \"name\": \"neutral oil\",\n      \"amount\": 1,\n      \"unit\": \"tbsp\"\n    },\n    {\n      \"name\": \"kosher salt\",\n      \"amount\": \"3/4\",\n      \"unit\": \"tsp\"\n    },\n    {\n      \"name\": \"honey\",\n      \"amount\": 2,\n      \"unit\": \"tbsp\"\n    },\n    {\n      \"name\": \"chilli crisp\",\n      \"amount\": \"1-2\",\n      \"unit\": \"tbsp\"\n    },\n    {\n      \"name\": \"rice vinegar\",\n      \"amount\": 2,\n      \"unit\": \"tsp\"\n    },\n    {\n      \"name\": \"spring onions\",\n      \"amount\": 2,\n      \"note\": \"thinly sliced\"\n    }\n  ],\n  \"steps\": [\n    {\n      \"title\": \"Dry and season\",\n      \"content\": \"Pat the thighs bone dry, rub with oil and salt, and let them sit uncovered while the Foodi preheats.\",\n      \"timer_seconds\": 600\n    },\n    {\n      \"title\": \"Preheat\",\n      \"content\": \"Set the Foodi to AIR CRISP at 200C / 390F and preheat.\",\n      \"timer_seconds\": 180\n    },\n    {\n      \"title\": \"Air crisp skin-side up\",\n      \"content\": \"Arrange skin-side up in a single layer. Cook without turning.\",\n      \"timer_seconds\": 900\n    },\n    {\n      \"title\": \"Glaze\",\n      \"content\": \"Stir honey, chilli crisp and vinegar together. Brush over the thighs and cook until the glaze is lacquered and bubbling.\",\n      \"timer_seconds\": 300\n    },\n    {\n      \"title\": \"Rest and finish\",\n      \"content\": \"Rest 5 minutes, then shower with spring onions.\",\n      \"timer_seconds\": 300\n    }\n  ],\n  \"notes\": [\n    \"Internal temperature should read 75C / 165F at the bone.\"\n  ]\n}"
+          }
+        }
+      ]
+    },
+    {
+      "uuid": "m5",
+      "sender": "assistant",
+      "created_at": "2026-08-12T18:15:03.000Z",
+      "text": "And a quick side, no card needed:\n\n## Smashed Cucumber Salad\n\nCold, crunchy, ready before the chicken rests.\n\nServes 2\n\n### Ingredients\n\n- 2 Persian cucumbers\n- 1 tsp kosher salt\n- 1 tbsp rice vinegar\n- 2 tsp sesame oil\n- 1 clove garlic, minced\n\n### Instructions\n\n1. **Smash and salt** Smash the cucumbers with the flat of a knife, tear into bite-size pieces, toss with salt and drain for 15 minutes.\n2. **Dress** Whisk vinegar, sesame oil and garlic, toss with the drained cucumbers.\n3. **Chill** Rest in the fridge for 10 minutes before serving.\n\n### Notes\n\n- Draining is what keeps the dressing from going watery.\n",
+      "content": [
+        {
+          "type": "text",
+          "text": "And a quick side, no card needed."
+        }
+      ]
+    }
+  ]
+}

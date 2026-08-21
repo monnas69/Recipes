@@ -134,7 +134,7 @@ export const COUNTABLE_UNITS = [
   'package', 'scoop', 'handful', 'bunch', 'tablespoon', 'teaspoon', 'ounce',
   'pound', 'quart', 'pint', 'gallon', 'liter', 'litre', 'gram', 'kilogram',
   'head', 'ear', 'rib', 'strip', 'fillet', 'sheet', 'piece', 'bulb', 'stalk',
-  'leaf', 'wedge', 'square', 'drop', 'knob', 'jar', 'bottle', 'tin', 'bag', 'box'
+  'leaf', 'wedge', 'square', 'drop', 'knob', 'jar', 'bottle', 'tin', 'bag', 'box', 'stem'
 ];
 
 const IRREGULAR_PLURALS = { leaf: 'leaves' };

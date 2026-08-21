@@ -7,6 +7,7 @@
 
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { decodeHtmlEntities } from './util.js';
 
 const TEXT_KEYS = new Set([
   'text', 'content', 'body', 'message', 'markdown', 'value', 'answer', 'response'
@@ -32,27 +33,17 @@ export function isClaudeUrl(value) {
   return /^https?:\/\//i.test(String(value ?? ''));
 }
 
-const ENTITIES = {
-  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'", '#x27': "'"
-};
-
 /** Minimal HTML -> text conversion (no DOM dependency). */
 export function htmlToText(html) {
-  return String(html)
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(p|div|li|h[1-6]|pre|tr)>/gi, '\n')
-    .replace(/<li\b[^>]*>/gi, '- ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, entity) => {
-      const key = entity.toLowerCase();
-      if (ENTITIES[key] != null) return ENTITIES[key];
-      if (key.startsWith('#x')) return String.fromCodePoint(parseInt(key.slice(2), 16));
-      if (key.startsWith('#')) return String.fromCodePoint(parseInt(key.slice(1), 10));
-      return match;
-    })
-    .replace(/\n{3,}/g, '\n\n');
+  return decodeHtmlEntities(
+    String(html)
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/(p|div|li|h[1-6]|pre|tr)>/gi, '\n')
+      .replace(/<li\b[^>]*>/gi, '- ')
+      .replace(/<[^>]+>/g, '')
+  ).replace(/\n{3,}/g, '\n\n');
 }
 
 /** Recursively pull out `<script>` payloads that contain JSON (saved pages). */
@@ -320,10 +311,17 @@ export async function loadSource(source, options = {}) {
     if (!blobs.length) blobs = [{ text: raw, label: 'document', index: 0 }];
   } else if (format === 'html') {
     const embedded = htmlEmbeddedJson(raw);
+    const embeddedParsed = [];
     for (const payload of embedded) {
       const parsed = looseJsonParse(payload);
-      if (parsed !== undefined) blobs.push(...blobsFromJson(parsed));
+      if (parsed === undefined) continue;
+      embeddedParsed.push(parsed);
+      blobs.push(...blobsFromJson(parsed));
     }
+    // Recipe blogs embed schema.org Recipe data (JSON-LD) for SEO — expose it
+    // as `data` so the structured-card scan can find it directly, the same
+    // path a JSON conversation export goes through.
+    if (embeddedParsed.length) data = embeddedParsed;
     blobs.push({ text: htmlToText(raw), label: 'page', index: blobs.length });
   } else {
     blobs = [{ text: raw, label: 'transcript', index: 0 }];

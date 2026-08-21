@@ -142,11 +142,18 @@ export function parseIngredientLine(line) {
 /** Best-effort extraction of a timer from step text ("simmer for 12 minutes"). */
 export function inferTimerSeconds(text) {
   const source = String(text ?? '');
-  const re = /(?:for|about|approximately|around)?\s*(\d+(?:\.\d+)?)\s*(?:-|–|to)?\s*(\d+(?:\.\d+)?)?\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/i;
+  // A negative lookbehind keeps this off the "2" in "1/2" — without it,
+  // "about 1 to 1 1/2 minutes" reads as a false "2 minutes" match, because
+  // "2 minutes" is a literal substring of "1/2 minutes".
+  const re = new RegExp(
+    '(?<![\\d/])(' + NUMBER_TOKEN + ')' + RANGE_SEPARATOR + '?(' + NUMBER_TOKEN + ')?' +
+    '\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\\b',
+    'i'
+  );
   const match = source.match(re);
   if (!match) return null;
-  const value = Number(match[2] ?? match[1]);
-  if (!isFinite(value) || value <= 0) return null;
+  const value = parseNumberToken(match[2] ?? match[1]);
+  if (value == null || !isFinite(value) || value <= 0) return null;
   const unit = match[3].toLowerCase();
   if (/^h/.test(unit)) return Math.round(value * 3600);
   if (/^m/.test(unit)) return Math.round(value * 60);

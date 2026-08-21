@@ -73,17 +73,16 @@ function renderIngredients(recipe) {
   return chunks.join('\n');
 }
 
-function renderSteps(recipe) {
-  const items = recipe.steps.map((step, index) => {
-    const id = `step-${index + 1}`;
-    const title = step.title
-      ? `<p class="step-title">${escapeHtml(step.title)}</p>`
-      : '';
-    const content = step.content && step.content !== step.title
-      ? `<p class="step-content">${escapeHtml(step.content)}</p>`
-      : '';
-    const timer = step.timer_seconds
-      ? `
+function renderStep(step, index) {
+  const id = `step-${index + 1}`;
+  const title = step.title
+    ? `<p class="step-title">${escapeHtml(step.title)}</p>`
+    : '';
+  const content = step.content && step.content !== step.title
+    ? `<p class="step-content">${escapeHtml(step.content)}</p>`
+    : '';
+  const timer = step.timer_seconds
+    ? `
             <div class="timer-wrap">
               <button type="button" class="timer" data-timer="${id}" data-seconds="${step.timer_seconds}" data-step="${index + 1}" aria-label="Step ${index + 1} timer, ${escapeHtml(formatDuration(step.timer_seconds))}, tap to start">
                 <span class="timer-icon" aria-hidden="true">⏱</span>
@@ -92,8 +91,8 @@ function renderSteps(recipe) {
               </button>
               <button type="button" class="timer-reset no-print" data-timer-reset="${id}" hidden>reset</button>
             </div>`
-      : '';
-    return `        <li class="step">
+    : '';
+  return `        <li class="step">
           <span class="step-index" aria-hidden="true">${index + 1}</span>
           <div class="step-main">
             ${title}
@@ -101,8 +100,27 @@ function renderSteps(recipe) {
           </div>
           <input type="checkbox" id="${id}-check" data-key="${escapeHtml(step.id)}" data-kind="step" aria-label="Mark step ${index + 1} done">
         </li>`;
+}
+
+// A recipe with distinct stages ("Preparation" / "Cooking", "Sauce" /
+// "Assembly" — schema.org's HowToSection, or a hand-written step.group) gets
+// those as dividers. Numbering stays continuous across groups so the
+// checklist and progress bar don't have to think about sections at all.
+function renderSteps(recipe) {
+  const groups = new Map();
+  recipe.steps.forEach((step, index) => {
+    const key = step.group || '';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ step, index });
   });
-  return `      <ul class="list">\n${items.join('\n')}\n      </ul>`;
+
+  const chunks = [];
+  for (const [group, entries] of groups) {
+    if (group) chunks.push(`<h3 class="group-title">${escapeHtml(group)}</h3>`);
+    const items = entries.map(({ step, index }) => renderStep(step, index));
+    chunks.push(`      <ul class="list">\n${items.join('\n')}\n      </ul>`);
+  }
+  return chunks.join('\n');
 }
 
 function renderMeta(recipe) {

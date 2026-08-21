@@ -13,6 +13,26 @@ export function slugify(text, fallback = 'recipe') {
   return slug || fallback;
 }
 
+const HTML_ENTITIES = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'", '#x27': "'"
+};
+
+/**
+ * Decode HTML entities in plain text (&#39; &quot; &nbsp; etc). Many recipe
+ * sites embed schema.org Recipe data whose ingredient/step text is raw,
+ * HTML-escaped CMS content rather than plain text, so this runs on every
+ * string pulled out of a source card, not just HTML pages.
+ */
+export function decodeHtmlEntities(text) {
+  return String(text ?? '').replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, entity) => {
+    const key = entity.toLowerCase();
+    if (HTML_ENTITIES[key] != null) return HTML_ENTITIES[key];
+    if (key.startsWith('#x')) return String.fromCodePoint(parseInt(key.slice(2), 16));
+    if (key.startsWith('#')) return String.fromCodePoint(parseInt(key.slice(1), 10));
+    return match;
+  });
+}
+
 /** Escape text for interpolation into HTML element content or attributes. */
 export function escapeHtml(value) {
   return String(value ?? '')
@@ -58,7 +78,7 @@ export function toArray(value) {
 export function pickString(source, keys) {
   for (const key of keys) {
     const value = source?.[key];
-    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (typeof value === 'string' && value.trim()) return decodeHtmlEntities(value.trim());
     if (typeof value === 'number' && Number.isFinite(value)) return String(value);
   }
   return '';

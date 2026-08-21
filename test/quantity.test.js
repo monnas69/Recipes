@@ -46,3 +46,12 @@ test('infers timers from step text', () => {
   assert.equal(inferTimerSeconds('Rest 10-15 minutes'), 900, 'ranges use the longer end');
   assert.equal(inferTimerSeconds('Serve immediately'), null);
 });
+
+test('does not mistake a fraction denominator for a whole number', () => {
+  // "1/2 minutes" contains the literal substring "2 minutes" — a naive scan
+  // for "<number> <unit>" latches onto that "2" and reports 2 minutes for a
+  // step that actually says one-and-a-half.
+  assert.equal(inferTimerSeconds('about 1 to 1 1/2 minutes'), 90);
+  assert.equal(inferTimerSeconds('Marinate for 1 1/2 hours'), 5400);
+  assert.equal(inferTimerSeconds('Rest for 3/4 hour'), 2700);
+});

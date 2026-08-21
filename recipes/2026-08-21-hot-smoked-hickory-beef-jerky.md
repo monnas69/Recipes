@@ -24,7 +24,7 @@ while the generator does the smoke.
     { "id": "garlic", "name": "garlic powder", "amount": 1, "unit": "teaspoons", "group": "Marinade" },
     { "id": "onion", "name": "onion powder", "amount": 1, "unit": "teaspoons", "group": "Marinade" },
     { "id": "pepper", "name": "black pepper", "amount": 1, "unit": "teaspoons", "group": "Marinade" },
-    { "id": "cayenne", "name": "cayenne pepper", "amount": 0.3, "unit": "teaspoons", "group": "Marinade" },
+    { "id": "cayenne", "name": "cayenne pepper", "amount": 0.25, "unit": "teaspoons", "group": "Marinade" },
     { "id": "salt", "name": "salt", "amount": 1, "unit": "teaspoons", "group": "Marinade" },
     { "id": "hickory", "name": "hickory chips or sawdust", "amount": 2, "unit": "cups", "note": "for the Smokai, topped up as it burns through", "group": "For smoking" }
   ],

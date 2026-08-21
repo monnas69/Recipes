@@ -84,3 +84,23 @@ test('index page links every card', () => {
   assert.ok(index.includes('href="other.html"'));
   assert.ok(index.includes('2 cards'));
 });
+
+test('the servings label reflects the unit for batch-style recipes', () => {
+  const batch = normalizeRecipe({
+    title: 'Bulk Mix',
+    base_servings: 10,
+    servings_unit: 'kg batch',
+    ingredients: [{ name: 'salt', amount: 100, unit: 'grams' }],
+    steps: ['Mix everything.']
+  }, {});
+  const batchHtml = renderCard(batch);
+  assert.ok(batchHtml.includes('id="servings-caption">Batch size<'));
+
+  const normal = normalizeRecipe({
+    title: 'Weeknight Soup',
+    base_servings: 4,
+    ingredients: [{ name: 'stock', amount: 1, unit: 'l' }],
+    steps: ['Simmer.']
+  }, {});
+  assert.ok(renderCard(normal).includes('id="servings-caption">Servings<'));
+});

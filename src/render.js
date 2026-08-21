@@ -17,6 +17,15 @@ const CSS = readAsset('card.css');
 const FORMAT_JS = readAsset('format.js').replace(/^export\s+/gm, '');
 const CLIENT_JS = readAsset('card-client.js');
 
+/** The toolbar label for the scaling control: "Servings" by default, but a
+ * batch-style unit (e.g. "kg batch") reads better as "Batch size". */
+function servingsLabel(unit) {
+  const clean = String(unit || 'servings').trim();
+  if (/batch/i.test(clean)) return 'Batch size';
+  if (/^(servings?|portions?)$/i.test(clean)) return 'Servings';
+  return clean.charAt(0).toUpperCase() + clean.slice(1);
+}
+
 const META_LABELS = {
   prep_time: 'Prep',
   cook_time: 'Cook',
@@ -193,7 +202,7 @@ ${renderMeta(recipe)}
 
   <div class="toolbar">
     <div class="servings">
-      <span class="servings-label" id="servings-caption">Servings</span>
+      <span class="servings-label" id="servings-caption">${escapeHtml(servingsLabel(recipe.servings_unit))}</span>
       <div class="stepper">
         <button type="button" class="round" id="servings-minus" aria-label="Fewer servings">−</button>
         <span class="servings-value" id="servings-value" aria-live="polite">${recipe.base_servings}</span>

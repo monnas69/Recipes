@@ -369,7 +369,9 @@ ${items.join('\n')}
       rows[i].hidden = !match;
       if (match) shown += 1;
     }
-    count.textContent = query ? shown + ' of ' + rows.length : rows.length + ' recipes';
+    count.textContent = query
+      ? shown + ' of ' + rows.length
+      : rows.length + (rows.length === 1 ? ' recipe' : ' recipes');
     empty.hidden = shown !== 0;
   }
 

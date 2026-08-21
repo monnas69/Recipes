@@ -169,6 +169,8 @@ recipe several times, it keeps only the final version of each title.
 
 ## Publish to GitHub Pages
 
+**Live: https://monnas69.github.io/Recipes/**
+
 The repo ships with everything needed to serve your cards as a real website, so
 the library is a tap away on a phone instead of a folder of files to download.
 

@@ -118,3 +118,12 @@ test('the index page carries a working filter and search metadata', async () => 
   assert.match(html, /data-search="[^"]*cream cheese[^"]*"/, 'ingredients are searchable');
   assert.equal((html.match(/class="card-row"/g) || []).length, 3);
 });
+
+test('the card count reads naturally for a single recipe', async () => {
+  const outDir = await tmp();
+  await exportRecipes(TRANSCRIPT, { outDir });
+  const html = await readFile(path.join(outDir, 'index.html'), 'utf8');
+  assert.ok(html.includes('<span>1 card</span>'), 'header counts one card, not "1 cards"');
+  assert.ok(html.includes("' recipe' : ' recipes'"), 'the filter count singularises too');
+  assert.ok(!/\b1 (cards|recipes)\b/.test(html));
+});

@@ -85,6 +85,19 @@ test('index page links every card', () => {
   assert.ok(index.includes('2 cards'));
 });
 
+test('the index links to sibling pages only when asked', () => {
+  const plain = renderIndex([recipe], {});
+  assert.ok(!plain.includes('<nav class="index-nav'), 'a plain export links to nothing that may not exist');
+
+  const linked = renderIndex([recipe], {
+    links: [{ label: 'Meal planner', href: 'planner.html' }, { label: '', href: 'skip.html' }]
+  });
+  assert.ok(linked.includes('<nav class="index-nav no-print">'));
+  assert.ok(linked.includes('href="planner.html"'));
+  assert.ok(linked.includes('>Meal planner<'));
+  assert.ok(!linked.includes('skip.html'), 'links without a label are dropped');
+});
+
 test('the servings label reflects the unit for batch-style recipes', () => {
   const batch = normalizeRecipe({
     title: 'Bulk Mix',

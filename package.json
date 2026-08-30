@@ -4,7 +4,8 @@
   "description": "Scrape recipe cards out of Claude.ai conversations and export them as self-contained, interactive HTML recipe cards.",
   "type": "module",
   "bin": {
-    "ninja-recipes": "bin/ninja-recipes.js"
+    "ninja-recipes": "bin/ninja-recipes.js",
+    "meal-planner": "bin/meal-planner.js"
   },
   "main": "src/index.js",
   "exports": {
@@ -13,13 +14,15 @@
   "files": [
     "bin",
     "src",
+    "planner",
     "README.md"
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
     "export": "node bin/ninja-recipes.js",
-    "site": "node bin/ninja-recipes.js recipes -o docs --site-title \"Recipes\"",
-    "site:pdf": "node bin/ninja-recipes.js recipes -o docs --site-title \"Recipes\" --pdf"
+    "site": "node bin/ninja-recipes.js recipes -o docs --site-title \"Recipes\" --link \"Meal planner=planner.html\" && node bin/meal-planner.js build",
+    "site:pdf": "node bin/ninja-recipes.js recipes -o docs --site-title \"Recipes\" --link \"Meal planner=planner.html\" --pdf && node bin/meal-planner.js build",
+    "planner": "node bin/meal-planner.js"
   },
   "engines": {
     "node": ">=18"
@@ -30,7 +33,9 @@
     "export",
     "html",
     "cli",
-    "cooking"
+    "cooking",
+    "meal-planner",
+    "shopping-list"
   ],
   "license": "MIT",
   "dependencies": {},

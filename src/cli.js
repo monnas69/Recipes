@@ -21,6 +21,7 @@ const OPTIONS = {
   'markdown-fallback': { type: 'boolean', default: true },
   library: { type: 'boolean', default: true },
   'site-title': { type: 'string' },
+  link: { type: 'string', multiple: true },
   list: { type: 'boolean', default: false },
   stdout: { type: 'boolean', default: false },
   quiet: { type: 'boolean', short: 'q', default: false },
@@ -48,6 +49,8 @@ Options
       --no-library       build index.html from this run only, ignoring cards
                          already in the output folder
       --site-title <t>   heading for index.html         (default: Recipe cards)
+      --link <l>=<href>  add a link to index.html (repeatable), e.g.
+                         --link "Meal planner=planner.html"
       --json             also write recipes.json (the normalised data)
       --keep <mode>      all | latest  — latest keeps only the newest card per
                          title, useful when a chat revised a recipe   (default: all)
@@ -105,6 +108,16 @@ export async function main(argv = process.argv.slice(2), io = console) {
     return 2;
   }
 
+  const links = [];
+  for (const entry of values.link || []) {
+    const split = entry.indexOf('=');
+    if (split < 1 || split === entry.length - 1) {
+      io.error(`--link must look like "Label=page.html" (got "${entry}").`);
+      return 2;
+    }
+    links.push({ label: entry.slice(0, split).trim(), href: entry.slice(split + 1).trim() });
+  }
+
   const log = values.quiet ? () => {} : (message) => io.log(message);
   const shared = {
     format: values.format,
@@ -138,6 +151,7 @@ export async function main(argv = process.argv.slice(2), io = console) {
       index: values.index,
       library: values.library,
       siteTitle: values['site-title'],
+      links,
       json: values.json
     });
 

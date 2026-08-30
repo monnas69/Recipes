@@ -11,6 +11,7 @@ on:
       - 'recipes/**'
       - 'src/**'
       - 'bin/**'
+      - 'planner/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 

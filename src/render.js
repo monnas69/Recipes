@@ -292,6 +292,13 @@ export function renderIndex(recipes, options = {}) {
   const sourceLabel = options.sourceLabel || '';
   const heading = options.title || 'Recipe cards';
 
+  // Optional sibling pages in the same folder (the meal planner, say). Kept
+  // opt-in so a plain card export never links to a page that isn't there.
+  const links = (options.links || [])
+    .filter((link) => link && link.label && link.href)
+    .map((link) => `<a class="nav-link" href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a>`)
+    .join('\n      ');
+
   const items = recipes.map((recipe) => {
     const timers = (recipe.steps || []).filter((step) => step.timer_seconds).length;
     const bits = [
@@ -354,6 +361,18 @@ ${CSS}
 .row-meta { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .empty { color: var(--muted); padding: 18px 0; }
 .empty[hidden] { display: none; }
+.index-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.nav-link {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+}
+.nav-link:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -365,6 +384,7 @@ ${CSS}
     </div>
     <h1>${escapeHtml(heading)}</h1>
     ${sourceLabel ? `<p class="description">Last built from ${escapeHtml(sourceLabel)}</p>` : ''}
+    ${links ? `<nav class="index-nav no-print">\n      ${links}\n    </nav>` : ''}
   </header>
   <section>
     <div class="search-row no-print">

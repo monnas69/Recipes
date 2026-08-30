@@ -152,6 +152,7 @@ Each card is one HTML file with everything inlined:
       --no-library       build index.html from this run only, ignoring cards
                          already in the output folder
       --site-title <t>   heading for index.html         (default: Recipe cards)
+      --link <l>=<href>  add a link to index.html (repeatable)
       --json             also write recipes.json (the normalised data)
       --keep <mode>      all | latest — latest keeps only the newest card per title
       --title <text>     only export cards whose title contains <text>
@@ -230,6 +231,22 @@ Also exported: `extractRecipes`, `parseMarkdownRecipes`, `findStructuredCards`,
 `htmlFileToPdf`, and the amount helpers (`parseAmount`, `formatAmount`,
 `scaledAmountWithUnit`, `formatClock`).
 
+## Meal planner
+
+The site also builds a weekly meal planner at `docs/planner.html`, linked from
+the index. Assign recipes to days, adjust servings per meal, and it aggregates a
+de-duplicated shopping list from everything planned that week.
+
+```bash
+npm run planner                     # rebuild docs/planner.html
+npm run planner shopping 2026-W36   # print a week's list, no browser needed
+```
+
+Plans are JSON files committed under `planner/data/plans/`, one per ISO week —
+shared between people by git, like the recipes. There is no server and no
+account. Full documentation, including the shopping-list merging rules, is in
+[`planner/README.md`](planner/README.md).
+
 ## Layout
 
 ```
@@ -245,6 +262,8 @@ src/export.js          pipeline: load → extract → render → write
 src/library.js         reads existing cards back out of the output folder
 src/pdf.js             optional PDF backends
 src/shared/            inlined into every card: format.js, card.css, card-client.js
+planner/               the meal planner (see planner/README.md)
+planner/data/plans/    one committed JSON file per planned week
 ```
 
 `src/shared/format.js` is imported by the CLI *and* inlined into every exported
@@ -257,12 +276,14 @@ same code the CLI tests cover.
 npm test
 ```
 
-61 tests: quantity parsing, scaling and unit agreement, card extraction from
+120 tests: quantity parsing, scaling and unit agreement, card extraction from
 every supported shape, HTML rendering (escaping, no external references,
 embedded data), library rebuilds (carry-over, deletion, re-export), the CLI end
-to end, and a real-browser pass driving the slider, checkboxes, timers, theme
-toggle and print styles. The browser test
-skips itself unless Playwright is installed:
+to end, ISO week maths across year boundaries, shopping-list aggregation, plan
+validation, and two real-browser passes — one driving a card's slider,
+checkboxes, timers, theme toggle and print styles, one planning a week in the
+planner and checking the shopping list it produces. The browser tests skip
+themselves unless Playwright is installed:
 
 ```bash
 npm i -D playwright && npx playwright install chromium

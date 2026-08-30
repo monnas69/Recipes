@@ -167,3 +167,16 @@ test('CLI writes cards to --out', async () => {
   assert.equal(await main([EXAMPLE, '-o', outDir, '--title', 'Creami', '-q'], io), 0);
   assert.deepEqual((await readdir(outDir)).sort(), ['index.html', 'ninja-creami-vanilla-bean-ice-cream.html']);
 });
+
+test('--link adds an index link and rejects a malformed one', async () => {
+  const outDir = await tmp();
+  const good = captureIo();
+  assert.equal(await main([EXAMPLE, '-o', outDir, '--link', 'Meal planner=planner.html'], good.io), 0);
+  const index = await readFile(path.join(outDir, 'index.html'), 'utf8');
+  assert.ok(index.includes('href="planner.html"'));
+  assert.ok(index.includes('>Meal planner<'));
+
+  const bad = captureIo();
+  assert.equal(await main([EXAMPLE, '-o', outDir, '--link', 'planner.html'], bad.io), 2);
+  assert.match(bad.err.join('\n'), /--link must look like/);
+});

@@ -76,7 +76,8 @@ export async function exportRecipes(source, options = {}) {
     const html = renderIndex(library, {
       generatedAt,
       sourceLabel: options.sourceLabel ?? origin,
-      title: options.siteTitle
+      title: options.siteTitle,
+      links: options.links
     });
     await writeFile(indexPath, html, 'utf8');
     files.push({ type: 'index', path: indexPath, cards: library.length });

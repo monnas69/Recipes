@@ -11,3 +11,15 @@ When adding a new confirmed/tested recipe source to `recipes/`:
    The user has standing approval for this — merging is what publishes the
    recipe to the live site (https://monnas69.github.io/Recipes/) via the
    `pages.yml` GitHub Actions workflow.
+
+## Publishing a meal plan
+
+Plans are JSON files under `planner/data/plans/`, one per ISO week. To save one
+downloaded from the planner page:
+
+```bash
+npm run planner import <file>   # validates, bumps the revision, writes the file
+```
+
+Then commit `planner/data/plans/` and push. Do not hand-edit a plan's
+`revision` — the planner uses it to detect that the other cook published first.

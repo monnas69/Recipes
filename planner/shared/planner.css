@@ -1,0 +1,300 @@
+/* Meal planner — layered on top of card.css, which is inlined first and
+   supplies the palette, the button styling and the print rules. */
+
+.planner {
+  max-width: 76rem;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.planner-body { padding: 20px 28px 28px; }
+
+/* ---------------- week bar ---------------- */
+
+.week-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-alt);
+}
+
+.week-title { display: flex; flex-direction: column; gap: 1px; min-width: 12rem; }
+.week-title strong { font-size: 1.1rem; font-family: var(--font-display); }
+.week-title span { color: var(--muted); font-size: 13px; }
+.week-nav { display: flex; align-items: center; gap: 6px; }
+.week-bar .spacer { flex: 1 1 auto; }
+.week-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.chip-today {
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 3px 9px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  align-self: center;
+}
+
+/* ---------------- save state ---------------- */
+
+.save-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.save-bar[data-state="clean"] { color: var(--muted); }
+.save-bar[data-state="dirty"] { background: var(--accent-soft); color: var(--accent); }
+.save-bar .save-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+
+.author-input {
+  font: inherit;
+  color: inherit;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.banner {
+  margin: 16px 28px 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  font-size: 14px;
+}
+.banner[hidden] { display: none; }
+.banner p { margin: 0 0 8px; }
+.banner .banner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------------- layout ---------------- */
+
+.planner-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .planner-grid { grid-template-columns: minmax(0, 1fr); }
+  .planner-body { padding: 16px; }
+  .week-bar, .save-bar { padding-left: 16px; padding-right: 16px; }
+  .banner { margin-left: 16px; margin-right: 16px; }
+}
+
+.panel-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+.panel-title .count { color: var(--muted); font-size: 13px; font-weight: 400; }
+
+/* ---------------- day grid ---------------- */
+
+/* One row per day rather than seven columns: at any realistic width a
+   seven-column strip squeezes recipe titles into unreadable slivers, and a row
+   holds several meals a day without reflowing the whole week. */
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.day {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 8px 14px;
+  align-items: start;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 10px 12px;
+}
+
+@media (max-width: 640px) {
+  .day { grid-template-columns: minmax(0, 1fr); }
+}
+
+.day.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.day.drop-target { border-color: var(--accent); background: var(--accent-soft); }
+
+.day-head { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.day-head strong { font-size: .95rem; }
+.day-head span { color: var(--muted); font-size: 12px; }
+.day-head .day-add { padding: 2px 8px; font-size: 12px; border-radius: 999px; }
+
+.day-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.assignment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  flex: 1 1 16rem;
+  max-width: 26rem;
+}
+
+.assignment-main { flex: 1 1 auto; min-width: 0; }
+.assignment-main a { color: inherit; text-decoration: none; font-weight: 600; font-size: .92rem; }
+.assignment-main a:hover { color: var(--accent); }
+.assignment-meta { display: block; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+
+.assignment .servings-input {
+  width: 3.4rem;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 5px;
+  text-align: right;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.icon-button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted);
+}
+.icon-button:hover { color: var(--accent); }
+
+.day-empty { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+
+/* ---------------- recipe picker ---------------- */
+
+.picker { position: relative; }
+.picker input[type="search"] {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 8px;
+}
+
+.recipe-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 22rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.recipe-list li[hidden] { display: none; }
+
+.recipe-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  padding: 8px 10px;
+  cursor: grab;
+}
+.recipe-option:hover { background: var(--accent-soft); border-color: var(--border); }
+.recipe-option strong { display: block; font-size: .9rem; font-weight: 600; }
+.recipe-option span { display: block; color: var(--muted); font-size: 11.5px; }
+.recipe-list li:last-child .recipe-option { border-bottom: 0; }
+
+.picker-hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+.picker.arming .recipe-list { border-color: var(--accent); }
+
+/* ---------------- shopping list ---------------- */
+
+.shopping { margin-top: 28px; border-top: 1px solid var(--border); padding-top: 20px; }
+
+.shopping-list { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 28px; }
+@media (max-width: 700px) { .shopping-list { columns: 1; } }
+
+.shopping-item {
+  break-inside: avoid;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.shopping-item input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 3px 0 0;
+  accent-color: var(--done);
+  flex: none;
+}
+
+.shopping-item label { flex: 1 1 auto; min-width: 0; cursor: pointer; }
+.shopping-item.checked label { opacity: .45; text-decoration: line-through; }
+.shopping-item .qty { font-weight: 650; font-variant-numeric: tabular-nums; }
+.shopping-item .from { display: block; color: var(--muted); font-size: 11.5px; }
+.shopping-item .split-flag {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--warn);
+  margin-left: 5px;
+}
+
+.shopping-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.shopping-empty { color: var(--muted); padding: 10px 0; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  z-index: 20;
+}
+.toast[hidden] { display: none; }
+
+@media print {
+  .week-bar, .save-bar, .banner, .picker, .planner-grid > aside,
+  .shopping-actions, .day-head .day-add, .assignment .icon-button { display: none !important; }
+  .planner { border: 0; box-shadow: none; }
+  .planner-grid { grid-template-columns: minmax(0, 1fr); }
+  .shopping { break-before: page; }
+}

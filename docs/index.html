@@ -457,6 +457,18 @@ ul.list { list-style: none; margin: 0; padding: 0; }
 .row-meta { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .empty { color: var(--muted); padding: 18px 0; }
 .empty[hidden] { display: none; }
+.index-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.nav-link {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+}
+.nav-link:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -468,6 +480,9 @@ ul.list { list-style: none; margin: 0; padding: 0; }
     </div>
     <h1>Recipes</h1>
     <p class="description">Last built from recipes</p>
+    <nav class="index-nav no-print">
+      <a class="nav-link" href="planner.html">Meal planner</a>
+    </nav>
   </header>
   <section>
     <div class="search-row no-print">
@@ -556,7 +571,7 @@ ul.list { list-style: none; margin: 0; padding: 0; }
     <p class="empty" id="empty" hidden>Nothing matches that.</p>
   </section>
   <footer class="card-footer">
-    <span>Rebuilt 2026-08-22 with ninja-recipe-card-exporter</span>
+    <span>Rebuilt 2026-08-30 with ninja-recipe-card-exporter</span>
     <span>11 cards in this folder</span>
   </footer>
 </main>

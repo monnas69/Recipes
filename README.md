@@ -235,7 +235,10 @@ Also exported: `extractRecipes`, `parseMarkdownRecipes`, `findStructuredCards`,
 
 The site also builds a weekly meal planner at `docs/planner.html`, linked from
 the index. Assign recipes to days, adjust servings per meal, and it aggregates a
-de-duplicated shopping list from everything planned that week.
+de-duplicated shopping list from everything planned that week. A day can also
+hold a meal that is just a name — "leftovers", "bangers and mash" — for the
+things you cook without a card; those add nothing to the shopping list, and the
+list says so rather than leaving a silent gap.
 
 ```bash
 npm run planner                     # rebuild docs/planner.html

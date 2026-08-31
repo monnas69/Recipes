@@ -20,6 +20,9 @@ export const DEFAULT_PLANS_DIR = 'planner/data/plans';
 /** Cap per day: a guard against a malformed file, not a product decision. */
 const MAX_ENTRIES_PER_DAY = 12;
 
+/** Cap for a free-text meal name — day cards are narrow, and this is a name. */
+const MAX_TEXT_LENGTH = 80;
+
 /** An empty plan for a week. */
 export function emptyPlan(weekId) {
   const days = {};
@@ -39,13 +42,22 @@ function coerceEntry(raw) {
     return slug ? { slug, servings: null, note: '' } : null;
   }
   if (!raw || typeof raw !== 'object') return null;
+  const note = String(raw.note ?? '').trim().slice(0, 200);
   const slug = String(raw.slug ?? raw.recipe ?? raw.id ?? '').trim();
-  if (!slug) return null;
+
+  // A meal that is just a name — "bangers and mash", "leftovers". No recipe, so
+  // no ingredients to scale and no servings worth carrying. `slug` wins when an
+  // entry somehow has both, so a day never means two things at once.
+  if (!slug) {
+    const text = String(raw.text ?? '').trim().slice(0, MAX_TEXT_LENGTH);
+    return text ? { text, note } : null;
+  }
+
   const servings = Number(raw.servings);
   return {
     slug,
     servings: Number.isFinite(servings) && servings > 0 ? Math.round(servings) : null,
-    note: String(raw.note ?? '').trim().slice(0, 200)
+    note
   };
 }
 
@@ -80,11 +92,22 @@ export function isEmptyPlan(plan) {
   return Object.values(plan?.days || {}).every((entries) => !entries.length);
 }
 
-/** Every recipe assignment in a plan, flattened and in day order. */
+/**
+ * Every meal in a plan, flattened and in day order.
+ *
+ * Free-text meals come through with `recipe: null` and a `text` — they are part
+ * of the week even though they add nothing to the shopping list. A recipe whose
+ * slug has vanished from `recipes/` is still dropped: that is a broken
+ * reference, not a meal.
+ */
 export function planAssignments(plan, recipesBySlug) {
   const out = [];
   for (const date of weekDates(plan?.week)) {
     for (const entry of plan.days[date] || []) {
+      if (!entry.slug) {
+        out.push({ date, recipe: null, text: entry.text, servings: null, note: entry.note });
+        continue;
+      }
       const recipe = recipesBySlug.get(entry.slug);
       if (!recipe) continue;
       out.push({
@@ -103,6 +126,7 @@ export function missingSlugs(plan, recipesBySlug) {
   const missing = [];
   for (const entries of Object.values(plan?.days || {})) {
     for (const entry of entries) {
+      if (!entry.slug) continue; // a free-text meal references nothing
       if (!recipesBySlug.has(entry.slug) && missing.indexOf(entry.slug) === -1) missing.push(entry.slug);
     }
   }

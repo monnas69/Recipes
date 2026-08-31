@@ -179,6 +179,24 @@
   border-radius: 6px;
 }
 
+/* A free-text meal: a name, and nothing the shopping list can use. The input
+   reads as plain text until you reach for it. */
+.assignment.freeform { background: transparent; border-style: dashed; }
+.freeform-input {
+  width: 100%;
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 600;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 1px 4px;
+  margin: -1px -4px;
+}
+.freeform-input:hover { border-color: var(--border); }
+.freeform-input:focus { border-color: var(--accent); background: var(--surface); outline: none; }
+
 .icon-button {
   width: 24px;
   height: 24px;
@@ -234,6 +252,19 @@
 .recipe-option span { display: block; color: var(--muted); font-size: 11.5px; }
 .recipe-list li:last-child .recipe-option { border-bottom: 0; }
 
+.freeform-add {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--muted);
+  border-style: dashed;
+}
+.freeform-add:hover { color: var(--accent); border-color: var(--accent); }
+.freeform-add[hidden] { display: none; }
+
 .picker-hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
 .picker.arming .recipe-list { border-color: var(--accent); }
 
@@ -273,6 +304,20 @@
   margin-left: 5px;
 }
 
+.shopping-freeform {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+.shopping-freeform[hidden] { display: none; }
+.shopping-freeform strong { display: block; color: var(--muted); font-size: 11.5px;
+  text-transform: uppercase; letter-spacing: .05em; }
+.shopping-freeform ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.shopping-freeform li { padding: 2px 0; }
+.shopping-freeform .from { color: var(--muted); font-size: 11.5px; margin-left: 8px; }
+
 .shopping-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 .shopping-empty { color: var(--muted); padding: 10px 0; }
 
@@ -294,6 +339,8 @@
 @media print {
   .week-bar, .save-bar, .banner, .picker, .planner-grid > aside,
   .shopping-actions, .day-head .day-add, .assignment .icon-button { display: none !important; }
+  /* A printed week shows names, not form fields. */
+  .freeform-input { border-color: transparent !important; padding: 0; margin: 0; -webkit-appearance: none; appearance: none; }
   .planner { border: 0; box-shadow: none; }
   .planner-grid { grid-template-columns: minmax(0, 1fr); }
   .shopping { break-before: page; }

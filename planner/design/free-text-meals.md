@@ -1,6 +1,8 @@
 # Spec — free-text meals
 
-Status: proposed. Nothing below is built yet.
+Status: **built**. This is the design note the implementation was written from;
+it is kept as the record of why the shape is what it is. Where the code and this
+document disagree, the code is right and this needs a patch.
 
 ## The problem
 

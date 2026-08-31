@@ -14,6 +14,14 @@ is a JSON file in this repo and the page is one self-contained HTML file.
 4. The shopping list builds itself underneath. Tick things off as you shop;
    the ticks are remembered on that device.
 
+Not every meal is a recipe. Type anything into the filter box and press return
+and it goes on the day as a plain name — "bangers and mash", "leftovers",
+"fish and chips". Click the name to fix a typo; clear it to remove the meal.
+
+Those meals have no ingredients, so **they add nothing to the shopping list**.
+The list names them at the bottom instead of pretending they are not there —
+knowing the list ignores a meal is what stops you coming home without it.
+
 Edits are kept in the browser as a draft, so closing the tab loses nothing.
 A draft is only *yours*, though — sharing it takes one more step.
 
@@ -110,7 +118,8 @@ copy of the recipe-parsing rules.
   "updated_by": "shayne",
   "days": {
     "2026-08-31": [{ "slug": "pad-see-ew-thai-stir-fried-noodles", "servings": 4, "note": "" }],
-    "2026-09-01": []
+    "2026-09-01": [{ "text": "Bangers and mash", "note": "use up the gravy" }],
+    "2026-09-02": []
   }
 }
 ```
@@ -118,6 +127,11 @@ copy of the recipe-parsing rules.
 Days are ISO dates, not weekday names, so a plan is unambiguous on its own.
 `servings` may be `null` to use the recipe's own base. `slug` is the recipe's
 slug — the filename it renders to in `docs/`.
+
+An entry with `text` and no `slug` is a meal that is just a name. It carries no
+`servings`, because there is nothing to scale. The two kinds are told apart by
+whether there is a `slug`, so every plan committed before this existed is still
+a valid plan; if an entry somehow has both, the `slug` wins.
 
 Files are hand-editable; everything read back is re-validated, and anything
 malformed is dropped rather than trusted.

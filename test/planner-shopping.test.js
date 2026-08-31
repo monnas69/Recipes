@@ -167,3 +167,47 @@ test('renders as plain text for the terminal and the clipboard', () => {
   assert.ok(text.includes('- flour  —  2 cups'));
   assert.ok(text.includes('- salt  —  to taste'));
 });
+
+/* ---------------- free-text meals ---------------- */
+
+test('a meal that is just a name adds nothing to the list', () => {
+  const list = buildShoppingList([
+    at(recipe('Soup', [{ name: 'stock', amount: 1, unit: 'l' }]), 2),
+    { recipe: null, text: 'Bangers and mash', note: 'gravy', date: '2026-09-01' },
+    { recipe: null, text: '   ', date: '2026-09-02' }
+  ]);
+
+  assert.equal(list.itemCount, 1, 'only the recipe contributes ingredients');
+  assert.equal(list.recipeCount, 1, 'free-text meals do not inflate the meal count');
+  assert.deepEqual(list.freeText, [
+    { date: '2026-09-01', text: 'Bangers and mash', note: 'gravy' }
+  ], 'a nameless entry is not a meal');
+});
+
+test('the text list names the meals it could not account for', () => {
+  const list = buildShoppingList([
+    at(recipe('Soup', [{ name: 'stock', amount: 1, unit: 'l' }]), 2),
+    { recipe: null, text: 'Leftovers', date: '2026-09-01' }
+  ]);
+
+  const text = shoppingListToText(list, 'Shopping list');
+  assert.match(text, /- stock/);
+  assert.match(text, /Not on this list \(no recipe\):/);
+  assert.match(text, /- Leftovers {2}— {2}Tue 1 Sep/);
+});
+
+test('a week of nothing but free-text meals still says so', () => {
+  const only = shoppingListToText(
+    buildShoppingList([{ recipe: null, text: 'Leftovers', date: '2026-09-01' }])
+  );
+  assert.doesNotMatch(only, /Nothing planned yet/,
+    'something was planned — it just has no ingredients');
+  assert.match(only, /- Leftovers/);
+
+  assert.match(shoppingListToText(buildShoppingList([])), /Nothing planned yet/);
+  assert.doesNotMatch(
+    shoppingListToText(buildShoppingList([at(recipe('Soup', [{ name: 'stock', amount: 1, unit: 'l' }]), 2)])),
+    /Not on this list/,
+    'no free-text meals, no extra block'
+  );
+});

@@ -147,3 +147,76 @@ test('a corrupt plan file for a specific week is reported, not swallowed', async
   await writeFile(planPath(dir, '2026-W36'), '{ oops', 'utf8');
   await assert.rejects(() => readPlan(dir, '2026-W36'), /not valid JSON/);
 });
+
+/* ---------------- free-text meals ---------------- */
+
+test('accepts a meal that is just a name', () => {
+  const plan = normalizePlan({
+    week: '2026-W36',
+    days: {
+      '2026-08-31': [
+        { text: '  Bangers and mash  ', note: '  use up the gravy  ' },
+        { text: 'x'.repeat(200) },
+        { text: '   ' },
+        { text: 'Leftovers', servings: 4 },
+        { slug: 'soup', text: 'ignored' }
+      ]
+    }
+  }, '2026-W36');
+
+  const day = plan.days['2026-08-31'];
+  assert.deepEqual(day[0], { text: 'Bangers and mash', note: 'use up the gravy' },
+    'text and note are trimmed');
+  assert.equal(day[1].text.length, 80, 'a name is capped at 80 characters');
+  assert.deepEqual(day[2], { text: 'Leftovers', note: '' },
+    'a blank name is dropped, and servings mean nothing without ingredients');
+  assert.deepEqual(day[3], { slug: 'soup', servings: null, note: '' },
+    'slug wins when an entry somehow carries both');
+  assert.equal(day.length, 4);
+});
+
+test('a week of free-text meals is not an empty week', () => {
+  const plan = normalizePlan({
+    week: '2026-W36', days: { '2026-08-31': [{ text: 'Leftovers' }] }
+  }, '2026-W36');
+  assert.equal(isEmptyPlan(plan), false);
+});
+
+test('free-text meals reference no recipe, so none can be missing', () => {
+  const plan = normalizePlan({
+    week: '2026-W36',
+    days: { '2026-08-31': [{ text: 'Leftovers' }, { slug: 'gone' }] }
+  }, '2026-W36');
+  assert.deepEqual(missingSlugs(plan, RECIPES), ['gone'],
+    'a free-text entry must not be reported as a missing recipe called "undefined"');
+});
+
+test('flattens free-text meals alongside recipes, in day order', () => {
+  const plan = normalizePlan({
+    week: '2026-W36',
+    days: {
+      '2026-08-31': [{ slug: 'soup', servings: 6 }, { text: 'Leftovers' }],
+      '2026-09-01': [{ text: 'Fish and chips', note: 'friday' }, { slug: 'gone' }]
+    }
+  }, '2026-W36');
+
+  assert.deepEqual(planAssignments(plan, RECIPES).map((a) => [
+    a.date, a.recipe ? a.recipe.title : a.text, a.servings
+  ]), [
+    ['2026-08-31', 'Soup', 6],
+    ['2026-08-31', 'Leftovers', null],
+    ['2026-09-01', 'Fish and chips', null]
+  ], 'free-text meals come through with no recipe; a vanished slug is still skipped');
+});
+
+test('round-trips a free-text meal through the plans folder', async () => {
+  const dir = await tmp();
+  const draft = normalizePlan({
+    week: '2026-W36',
+    days: { '2026-08-31': [{ text: 'Bangers and mash', note: 'gravy' }] }
+  }, '2026-W36');
+
+  await writePlan(dir, draft, { updatedBy: 'karen' });
+  const readBack = await readPlan(dir, '2026-W36');
+  assert.deepEqual(readBack.days['2026-08-31'], [{ text: 'Bangers and mash', note: 'gravy' }]);
+});

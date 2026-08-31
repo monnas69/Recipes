@@ -17,6 +17,9 @@
   var data = window.PLANNER_DATA;
   if (!data) return;
 
+  /** Matches MAX_TEXT_LENGTH in plan-store.js. */
+  var MAX_TEXT = 80;
+
   var DRAFT_PREFIX = 'meal-planner:draft:';
   var TICKS_PREFIX = 'meal-planner:ticked:';
   var THEME_KEY = 'meal-planner:theme';
@@ -84,7 +87,12 @@
     for (var d = 0; d < dates.length; d += 1) {
       var entries = plan.days[dates[d]] || [];
       for (var e = 0; e < entries.length; e += 1) {
-        out.push(dates[d] + '|' + entries[e].slug + '|' + (entries[e].servings || '') + '|' + (entries[e].note || ''));
+        // `text` is in here for a reason: without it every free-text meal on a
+        // day stringifies the same, so renaming one — or swapping it for a
+        // different one — would read as "no change", clear the draft and lose
+        // the edit on the next load.
+        out.push(dates[d] + '|' + (entries[e].slug || '') + '|' + (entries[e].text || '')
+          + '|' + (entries[e].servings || '') + '|' + (entries[e].note || ''));
       }
       out.push('/');
     }
@@ -134,12 +142,17 @@
       for (var e = 0; e < entries.length; e += 1) {
         var entry = entries[e];
         var slug = entry && typeof entry === 'object' ? entry.slug : entry;
-        if (!slug) continue;
+        var note = entry && entry.note ? String(entry.note) : '';
+        if (!slug) {
+          var text = entry && entry.text ? String(entry.text).trim().slice(0, MAX_TEXT) : '';
+          if (text) kept.push({ text: text, note: note });
+          continue;
+        }
         var servings = Number(entry && entry.servings);
         kept.push({
           slug: String(slug),
           servings: servings > 0 ? Math.round(servings) : null,
-          note: entry && entry.note ? String(entry.note) : ''
+          note: note
         });
       }
       plan.days[dates[d]] = kept;
@@ -170,6 +183,16 @@
     toast(recipe.title + ' → ' + dayName(date));
   }
 
+  /** A meal that is just a name — no recipe, nothing for the shopping list. */
+  function assignText(date, text) {
+    var name = String(text == null ? '' : text).trim().slice(0, MAX_TEXT);
+    if (!name || !state.plan.days[date]) return;
+    state.plan.days[date].push({ text: name, note: '' });
+    state.target = date;
+    changed();
+    toast(name + ' → ' + dayName(date));
+  }
+
   function unassign(date, index) {
     var entries = state.plan.days[date];
     if (!entries || !entries[index]) return;
@@ -193,6 +216,17 @@
     if (!entries || !entries[index]) return;
     var number = Number(value);
     entries[index].servings = number > 0 ? Math.round(number) : null;
+    changed();
+  }
+
+  /** Rename a free-text meal in place; clearing the name removes it. */
+  function setText(date, index, value) {
+    var entries = state.plan.days[date];
+    if (!entries || !entries[index] || entries[index].slug) return;
+    var name = String(value == null ? '' : value).trim().slice(0, MAX_TEXT);
+    if (name === entries[index].text) return;
+    if (name) entries[index].text = name;
+    else entries.splice(index, 1);
     changed();
   }
 
@@ -264,7 +298,37 @@
     el.days.innerHTML = html;
   }
 
+  /** The reorder/remove buttons, identical for both kinds of meal. */
+  function assignmentControls(date, index, total, label) {
+    return (total > 1
+      ? '<button type="button" class="icon-button no-print" data-move="-1" data-date="' + date
+        + '" data-index="' + index + '" aria-label="Move ' + escapeHtml(label) + ' earlier"'
+        + (index === 0 ? ' disabled' : '') + '>↑</button>'
+      : '')
+      + '<button type="button" class="icon-button no-print" data-remove="' + index + '" data-date="' + date
+      + '" aria-label="Remove ' + escapeHtml(label) + '">×</button>';
+  }
+
+  /**
+   * A free-text meal. The name is an input that reads as plain text until it is
+   * hovered or focused, so a typo is fixed by clicking it rather than by
+   * deleting the row and typing it again.
+   */
+  function renderFreeformAssignment(date, entry, index, total) {
+    var name = entry.text || '';
+    return '<li class="assignment freeform" data-date="' + date + '" data-index="' + index + '">'
+      + '<div class="assignment-main">'
+      + '<input class="freeform-input" type="text" value="' + escapeHtml(name) + '"'
+      + ' maxlength="' + MAX_TEXT + '" data-text="' + index + '" data-date="' + date + '"'
+      + ' aria-label="Meal on ' + escapeHtml(dayName(date) + ' ' + dayLabel(date)) + '">'
+      + '<span class="assignment-meta">not in the shopping list</span></div>'
+      + assignmentControls(date, index, total, name)
+      + '</li>';
+  }
+
   function renderAssignment(date, entry, index, total) {
+    if (!entry.slug) return renderFreeformAssignment(date, entry, index, total);
+
     var recipe = recipesBySlug[entry.slug];
     var title = recipe ? recipe.title : entry.slug;
     var servings = entry.servings || (recipe ? recipe.base_servings : null);
@@ -284,13 +348,7 @@
           + escapeHtml(servings) + '" data-servings="' + index + '" data-date="' + date + '"'
           + ' aria-label="Servings of ' + escapeHtml(title) + '">'
         : '')
-      + (total > 1
-        ? '<button type="button" class="icon-button no-print" data-move="-1" data-date="' + date
-          + '" data-index="' + index + '" aria-label="Move ' + escapeHtml(title) + ' earlier"'
-          + (index === 0 ? ' disabled' : '') + '>↑</button>'
-        : '')
-      + '<button type="button" class="icon-button no-print" data-remove="' + index + '" data-date="' + date
-      + '" aria-label="Remove ' + escapeHtml(title) + '">×</button>'
+      + assignmentControls(date, index, total, title)
       + '</li>';
   }
 
@@ -316,8 +374,45 @@
 
     var target = state.target || defaultTarget();
     el.pickerHint.textContent = recipes.length
-      ? 'Click a recipe to add it to ' + dayName(target) + ' ' + dayLabel(target) + ', or drag it onto any day.'
+      ? 'Click a recipe to add it to ' + dayName(target) + ' ' + dayLabel(target)
+        + ', or drag it onto any day. Anything else you type can go on as a plain name.'
       : 'Add recipe sources to recipes/ and rebuild.';
+    renderFreeformAdd();
+  }
+
+  /**
+   * When the filter box has text in it, offer it as a meal. Typing the name of
+   * something and finding nothing is exactly the moment a free-text meal is
+   * wanted, so the search box doubles as the entry field — no second control.
+   */
+  function renderFreeformAdd() {
+    var query = el.search ? el.search.value.trim() : '';
+    if (!query) {
+      el.freeformAdd.hidden = true;
+      el.freeformAdd.textContent = '';
+      return;
+    }
+    var target = state.target || defaultTarget();
+    el.freeformAdd.hidden = false;
+    el.freeformAdd.textContent = '+ Add \u201c' + query + '\u201d to ' + dayName(target) + ' ' + dayLabel(target);
+  }
+
+  function filterRecipes() {
+    var query = el.search.value.trim().toLowerCase();
+    var rows = el.recipeList.querySelectorAll('li[data-search]');
+    for (var r = 0; r < rows.length; r += 1) {
+      rows[r].hidden = query !== '' && rows[r].getAttribute('data-search').indexOf(query) === -1;
+    }
+  }
+
+  /** Clear the box before assigning, so the re-render hides the add row. */
+  function addFromSearch() {
+    var query = el.search.value.trim();
+    if (!query) return;
+    var target = state.target || defaultTarget();
+    el.search.value = '';
+    filterRecipes();
+    assignText(target, query);
   }
 
   function defaultTarget() {
@@ -332,6 +427,16 @@
     for (var d = 0; d < dates.length; d += 1) {
       var entries = state.plan.days[dates[d]] || [];
       for (var e = 0; e < entries.length; e += 1) {
+        if (!entries[e].slug) {
+          out.push({
+            recipe: null,
+            text: entries[e].text,
+            note: entries[e].note,
+            servings: null,
+            date: dates[d]
+          });
+          continue;
+        }
         var recipe = recipesBySlug[entries[e].slug];
         if (!recipe) continue;
         out.push({
@@ -344,17 +449,46 @@
     return out;
   }
 
+  /** Name the meals the list could not account for, rather than leaving a gap. */
+  function renderFreeformNote(freeText) {
+    if (!freeText.length) {
+      el.freeformNote.hidden = true;
+      el.freeformNote.innerHTML = '';
+      return;
+    }
+    var rows = '';
+    for (var i = 0; i < freeText.length; i += 1) {
+      var meal = freeText[i];
+      var when = meal.date ? dayName(meal.date) + ' ' + dayLabel(meal.date) : '';
+      rows += '<li>' + escapeHtml(meal.text)
+        + (when ? '<span class="from">' + escapeHtml(when) + '</span>' : '')
+        + '</li>';
+    }
+    el.freeformNote.innerHTML = '<strong>Not on this list (no recipe)</strong><ul>' + rows + '</ul>';
+    el.freeformNote.hidden = false;
+  }
+
   function renderShopping() {
     var assignments = currentAssignments();
     var list = buildShoppingList(assignments);
-    el.shoppingCount.textContent = list.itemCount
+    var freeText = list.freeText || [];
+
+    var count = list.itemCount
       ? list.itemCount + ' item' + (list.itemCount === 1 ? '' : 's') + ' from ' + list.recipeCount
         + ' meal' + (list.recipeCount === 1 ? '' : 's')
       : '';
+    if (freeText.length) {
+      count += (count ? ' · ' : '') + freeText.length + ' without recipe' + (freeText.length === 1 ? '' : 's');
+    }
+    el.shoppingCount.textContent = count;
+    renderFreeformNote(freeText);
 
     if (!list.items.length) {
       el.shoppingList.innerHTML = '';
       el.shoppingEmpty.hidden = false;
+      el.shoppingEmpty.textContent = freeText.length
+        ? 'Nothing to buy — every meal planned this week is a plain name.'
+        : 'Assign a recipe to a day and the list builds itself.';
       el.shoppingActions.hidden = true;
       return;
     }
@@ -480,6 +614,8 @@
     el.shoppingCount = document.getElementById('shopping-count');
     el.shoppingEmpty = document.getElementById('shopping-empty');
     el.shoppingActions = document.getElementById('shopping-actions');
+    el.freeformAdd = document.getElementById('freeform-add');
+    el.freeformNote = document.getElementById('shopping-freeform');
     el.saveBar = document.getElementById('save-bar');
     el.saveText = document.getElementById('save-text');
     el.discardButton = document.getElementById('discard-button');
@@ -553,8 +689,13 @@
     });
 
     el.days.addEventListener('change', function (event) {
-      var input = event.target.closest('[data-servings]');
-      if (input) setServings(input.getAttribute('data-date'), Number(input.getAttribute('data-servings')), input.value);
+      var servings = event.target.closest('[data-servings]');
+      if (servings) {
+        setServings(servings.getAttribute('data-date'), Number(servings.getAttribute('data-servings')), servings.value);
+        return;
+      }
+      var text = event.target.closest('[data-text]');
+      if (text) setText(text.getAttribute('data-date'), Number(text.getAttribute('data-text')), text.value);
     });
 
     el.recipeList.addEventListener('click', function (event) {
@@ -589,12 +730,19 @@
     });
 
     el.search.addEventListener('input', function () {
-      var query = el.search.value.trim().toLowerCase();
-      var rows = el.recipeList.querySelectorAll('li[data-search]');
-      for (var r = 0; r < rows.length; r += 1) {
-        rows[r].hidden = query !== '' && rows[r].getAttribute('data-search').indexOf(query) === -1;
-      }
+      filterRecipes();
+      renderFreeformAdd();
     });
+
+    // Type a name, press return: the whole interaction, without reaching for
+    // the mouse or leaving the box.
+    el.search.addEventListener('keydown', function (event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      addFromSearch();
+    });
+
+    el.freeformAdd.addEventListener('click', addFromSearch);
 
     el.shoppingList.addEventListener('change', function (event) {
       var box = event.target.closest('[data-tick]');

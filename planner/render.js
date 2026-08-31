@@ -27,6 +27,7 @@ export function inlineModule(source) {
 const CARD_CSS = readCardAsset('card.css');
 const PLANNER_CSS = readAsset('planner.css');
 const FORMAT_JS = inlineModule(readCardAsset('format.js'));
+const THEME_JS = inlineModule(readCardAsset('theme.js'));
 const WEEK_JS = inlineModule(readAsset('week.js'));
 const SYNC_JS = inlineModule(readAsset('sync.js'));
 const SHOPPING_JS = inlineModule(readAsset('shopping.js'));
@@ -202,6 +203,7 @@ try {
 </script>
 <script>
 ${FORMAT_JS}
+${THEME_JS}
 ${WEEK_JS}
 ${SYNC_JS}
 ${SHOPPING_JS}

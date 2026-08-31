@@ -15,6 +15,7 @@ const readAsset = (name) => readFileSync(new URL(`./shared/${name}`, import.meta
 const CSS = readAsset('card.css');
 // `export` keywords are stripped so the module doubles as a classic script.
 const FORMAT_JS = readAsset('format.js').replace(/^export\s+/gm, '');
+const THEME_JS = readAsset('theme.js').replace(/^export\s+/gm, '');
 const CLIENT_JS = readAsset('card-client.js');
 
 /** The toolbar label for the scaling control: "Servings" by default, but a
@@ -272,6 +273,7 @@ try {
 </script>
 <script>
 ${FORMAT_JS}
+${THEME_JS}
 ${CLIENT_JS}
 </script>
 <script type="application/ld+json">${jsonForScript(structuredData(recipe))}</script>
@@ -344,6 +346,7 @@ ${CSS}
 }
 #search:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 #search-count { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.search-row .round { flex: none; }
 .card-row { border-bottom: 1px dashed var(--border); }
 .card-row:last-child { border-bottom: 0; }
 .card-row[hidden] { display: none; }
@@ -390,6 +393,7 @@ ${CSS}
     <div class="search-row no-print">
       <input type="search" id="search" placeholder="Filter by name or ingredient…" aria-label="Filter recipes">
       <span id="search-count"></span>
+      <button type="button" id="theme-toggle" class="round" aria-label="Toggle theme">◐</button>
     </div>
     <ul class="list" id="card-list">
 ${items.join('\n')}
@@ -402,7 +406,12 @@ ${items.join('\n')}
   </footer>
 </main>
 <script>
+${THEME_JS}
+</script>
+<script>
 (function () {
+  initTheme('auto');
+
   var input = document.getElementById('search');
   var rows = Array.prototype.slice.call(document.querySelectorAll('.card-row'));
   var count = document.getElementById('search-count');

@@ -261,27 +261,6 @@
     updateTitle();
   }
 
-  /* ---------------- theme ---------------- */
-
-  function applyTheme() {
-    var root = document.documentElement;
-    if (state.theme === 'auto') root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme', state.theme);
-    var button = document.getElementById('theme-toggle');
-    if (button) {
-      var icon = state.theme === 'dark' ? '☾' : state.theme === 'light' ? '☀' : '◐';
-      button.textContent = icon;
-      button.setAttribute('aria-label', 'Theme: ' + state.theme + '. Click to change.');
-      button.title = 'Theme: ' + state.theme;
-    }
-  }
-
-  function cycleTheme() {
-    state.theme = state.theme === 'auto' ? 'light' : state.theme === 'light' ? 'dark' : 'auto';
-    applyTheme();
-    saveState();
-  }
-
   /* ---------------- wiring ---------------- */
 
   function resetAll() {
@@ -303,7 +282,13 @@
 
   function init() {
     loadState();
-    applyTheme();
+    // Theme is site-wide now (see shared/theme.js). This card's older
+    // per-recipe setting is the fallback, so a choice made before it was
+    // shared survives, and it keeps being written back into that state.
+    initTheme(state.theme, function (theme) {
+      state.theme = theme;
+      saveState();
+    });
     renderAmounts();
     applyChecks();
 
@@ -326,8 +311,6 @@
     var printBtn = document.getElementById('print-button');
     if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
 
-    var themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn) themeBtn.addEventListener('click', cycleTheme);
 
     var resetBtn = document.getElementById('reset-button');
     if (resetBtn) resetBtn.addEventListener('click', resetAll);

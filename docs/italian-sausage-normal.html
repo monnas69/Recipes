@@ -577,7 +577,7 @@ ul.list { list-style: none; margin: 0; padding: 0; }
 
 <p class="sr-only" id="timer-live" role="status" aria-live="assertive"></p>
 
-<script type="application/json" id="recipe-json">{"title":"Italian Sausage — Normal","slug":"italian-sausage-normal","description":"Bulk sausage mix, normal (non-hot) version. Mix everything into the mince, then run it through the sausage making machine.","exported_at":"2026-08-31T13:23:13.998Z","base_servings":10,"servings_unit":"kg batch","ingredients":[{"id":"mince","name":"mince","amount":10,"amount_max":null,"amount_text":"","unit":"kg","note":"","group":"","scalable":true},{"id":"salt","name":"salt","amount":300,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"paprika","name":"paprika","amount":200,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"fennel","name":"fennel","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"pepper","name":"pepper","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"bell_pepper","name":"bell pepper","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"red","group":"","scalable":true},{"id":"garlic_granules","name":"garlic granules","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"wine","name":"dry red wine","amount":325,"amount_max":null,"amount_text":"","unit":"ml","note":"","group":"","scalable":true}],"steps":[{"id":"step-1","title":"Mix","content":"Mix all ingredients thoroughly into the mince until evenly distributed.","group":"","timer_seconds":null,"number":1},{"id":"step-2","title":"Run through the sausage machine","content":"Run the mixed sausage meat through the sausage making machine into casings.","group":"","timer_seconds":null,"number":2}],"notes":["The slider scales the whole batch — set it to 5 for a half batch, 20 for double."],"meta":{"difficulty":"Easy","equipment":"Sausage making machine"}}</script>
+<script type="application/json" id="recipe-json">{"title":"Italian Sausage — Normal","slug":"italian-sausage-normal","description":"Bulk sausage mix, normal (non-hot) version. Mix everything into the mince, then run it through the sausage making machine.","exported_at":"2026-08-31T14:05:14.428Z","base_servings":10,"servings_unit":"kg batch","ingredients":[{"id":"mince","name":"mince","amount":10,"amount_max":null,"amount_text":"","unit":"kg","note":"","group":"","scalable":true},{"id":"salt","name":"salt","amount":300,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"paprika","name":"paprika","amount":200,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"fennel","name":"fennel","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"pepper","name":"pepper","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"bell_pepper","name":"bell pepper","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"red","group":"","scalable":true},{"id":"garlic_granules","name":"garlic granules","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","group":"","scalable":true},{"id":"wine","name":"dry red wine","amount":325,"amount_max":null,"amount_text":"","unit":"ml","note":"","group":"","scalable":true}],"steps":[{"id":"step-1","title":"Mix","content":"Mix all ingredients thoroughly into the mince until evenly distributed.","group":"","timer_seconds":null,"number":1},{"id":"step-2","title":"Run through the sausage machine","content":"Run the mixed sausage meat through the sausage making machine into casings.","group":"","timer_seconds":null,"number":2}],"notes":["The slider scales the whole batch — set it to 5 for a half batch, 20 for double."],"meta":{"difficulty":"Easy","equipment":"Sausage making machine"}}</script>
 <script>
 try {
   window.RECIPE_DATA = JSON.parse(document.getElementById('recipe-json').textContent);
@@ -763,6 +763,83 @@ function scaledAmountWithUnit(ingredient, factor) {
   const scaled = ingredient.amount * factor;
   const unit = formatUnit(ingredient.unit, ingredient.amount_max ? null : scaled);
   return unit ? amount + ' ' + unit : amount;
+}
+
+/**
+ * Light, dark, or follow the system — one implementation for every page this
+ * repo builds.
+ *
+ * Inlined into the recipe cards, the index and the planner with its `export`
+ * keywords stripped, the same trick format.js uses. The point of sharing it is
+ * the storage key: the choice is remembered once, for the whole site, so
+ * picking dark on the index and then opening a recipe does not throw you back
+ * into light.
+ */
+
+var THEME_KEY = 'ninja-recipe:theme';
+var THEMES = ['auto', 'light', 'dark'];
+
+function readTheme(fallback) {
+  try {
+    var stored = window.localStorage.getItem(THEME_KEY);
+    if (stored && THEMES.indexOf(stored) !== -1) return stored;
+  } catch (err) { /* private mode or blocked storage — the page still works */ }
+  return THEMES.indexOf(fallback) !== -1 ? fallback : 'auto';
+}
+
+function writeTheme(theme) {
+  try {
+    window.localStorage.setItem(THEME_KEY, theme);
+  } catch (err) { /* nothing to do */ }
+}
+
+/** auto -> light -> dark -> auto. */
+function nextTheme(theme) {
+  return theme === 'auto' ? 'light' : theme === 'light' ? 'dark' : 'auto';
+}
+
+/**
+ * Put a theme on the page. "auto" means no attribute at all, leaving the CSS
+ * to follow prefers-color-scheme.
+ */
+function applyTheme(theme) {
+  var root = document.documentElement;
+  if (theme === 'light' || theme === 'dark') root.setAttribute('data-theme', theme);
+  else root.removeAttribute('data-theme');
+
+  var button = document.getElementById('theme-toggle');
+  if (button) {
+    button.textContent = theme === 'dark' ? '☾' : theme === 'light' ? '☀' : '◐';
+    button.setAttribute('aria-label', 'Theme: ' + theme + '. Click to change.');
+    button.title = 'Theme: ' + theme;
+  }
+  return theme;
+}
+
+/**
+ * Apply the stored theme and wire the page's #theme-toggle, if it has one.
+ *
+ * `fallback` is used when nothing is stored site-wide yet. Pages that kept
+ * their own setting before this was shared pass it here, so a choice made
+ * earlier survives rather than silently resetting.
+ *
+ * `onChange` lets a page keep its own copy in step — the cards still write
+ * theme into their per-recipe state, so an older build reading that state
+ * finds what it expects.
+ */
+function initTheme(fallback, onChange) {
+  var theme = applyTheme(readTheme(fallback));
+  writeTheme(theme);
+
+  var button = document.getElementById('theme-toggle');
+  if (button) {
+    button.addEventListener('click', function () {
+      theme = applyTheme(nextTheme(theme));
+      writeTheme(theme);
+      if (onChange) onChange(theme);
+    });
+  }
+  return theme;
 }
 
 /**
@@ -1028,27 +1105,6 @@ function scaledAmountWithUnit(ingredient, factor) {
     updateTitle();
   }
 
-  /* ---------------- theme ---------------- */
-
-  function applyTheme() {
-    var root = document.documentElement;
-    if (state.theme === 'auto') root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme', state.theme);
-    var button = document.getElementById('theme-toggle');
-    if (button) {
-      var icon = state.theme === 'dark' ? '☾' : state.theme === 'light' ? '☀' : '◐';
-      button.textContent = icon;
-      button.setAttribute('aria-label', 'Theme: ' + state.theme + '. Click to change.');
-      button.title = 'Theme: ' + state.theme;
-    }
-  }
-
-  function cycleTheme() {
-    state.theme = state.theme === 'auto' ? 'light' : state.theme === 'light' ? 'dark' : 'auto';
-    applyTheme();
-    saveState();
-  }
-
   /* ---------------- wiring ---------------- */
 
   function resetAll() {
@@ -1070,7 +1126,13 @@ function scaledAmountWithUnit(ingredient, factor) {
 
   function init() {
     loadState();
-    applyTheme();
+    // Theme is site-wide now (see shared/theme.js). This card's older
+    // per-recipe setting is the fallback, so a choice made before it was
+    // shared survives, and it keeps being written back into that state.
+    initTheme(state.theme, function (theme) {
+      state.theme = theme;
+      saveState();
+    });
     renderAmounts();
     applyChecks();
 
@@ -1093,8 +1155,6 @@ function scaledAmountWithUnit(ingredient, factor) {
     var printBtn = document.getElementById('print-button');
     if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
 
-    var themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn) themeBtn.addEventListener('click', cycleTheme);
 
     var resetBtn = document.getElementById('reset-button');
     if (resetBtn) resetBtn.addEventListener('click', resetAll);

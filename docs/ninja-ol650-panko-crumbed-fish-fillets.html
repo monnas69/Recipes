@@ -613,7 +613,7 @@ ul.list { list-style: none; margin: 0; padding: 0; }
 
 <p class="sr-only" id="timer-live" role="status" aria-live="assertive"></p>
 
-<script type="application/json" id="recipe-json">{"title":"Ninja OL650 Panko Crumbed Fish Fillets","slug":"ninja-ol650-panko-crumbed-fish-fillets","description":"Crispy panko crumbed fish fillets air fried on the Reversible Rack — confirmed and tested.","exported_at":"2026-08-31T13:23:13.998Z","base_servings":4,"servings_unit":"servings","ingredients":[{"id":"fish","name":"fish fillets","amount":4,"amount_max":null,"amount_text":"","unit":"fillets","note":"2–2.5cm thick, cod or salmon","group":"","scalable":true},{"id":"flour","name":"plain flour","amount":4,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","group":"","scalable":true},{"id":"eggs","name":"eggs","amount":2,"amount_max":null,"amount_text":"","unit":"","note":"beaten","group":"","scalable":true},{"id":"panko","name":"panko breadcrumbs","amount":1,"amount_max":null,"amount_text":"","unit":"cup","note":"","group":"","scalable":true},{"id":"oil","name":"oil spray","amount":1,"amount_max":null,"amount_text":"","unit":"spray","note":"","group":"","scalable":true}],"steps":[{"id":"step-1","title":"Set up the coating stations","content":"Set up three shallow bowls: flour in the first, beaten eggs in the second, panko in the third.","group":"","timer_seconds":null,"number":1},{"id":"step-2","title":"Dredge","content":"Dredge each fillet through the flour, then the egg, then the panko. Press the panko firmly to coat.","group":"","timer_seconds":null,"number":2},{"id":"step-3","title":"Place on the rack","content":"Place the fillets on the Reversible Rack in the upper/higher position. Do not use the Cook & Crisp Basket.","group":"","timer_seconds":null,"number":3},{"id":"step-4","title":"Spray with oil","content":"Spray oil generously over both sides of each fillet.","group":"","timer_seconds":null,"number":4},{"id":"step-5","title":"Air fry","content":"Select Air Fry → 200°C → 12 minutes. Press START. Adjust ±1–2 minutes for thickness.","group":"","timer_seconds":360,"number":5},{"id":"step-6","title":"Flip and re-spray","content":"At 6 minutes, open the lid, flip each fillet and re-spray with oil.","group":"","timer_seconds":360,"number":6},{"id":"step-7","title":"Finish cooking","content":"Cook the remaining time until golden and crispy. Serve immediately.","group":"","timer_seconds":null,"number":7}],"notes":["Rack position matters — Reversible Rack upper/higher position, not the Cook & Crisp Basket.","Spray oil both sides before cooking and again at the flip.","Adjust cook time ±1–2 minutes depending on fillet thickness."],"meta":{"cook_time":"12 min","difficulty":"Easy","equipment":"Ninja OL650, Reversible Rack"}}</script>
+<script type="application/json" id="recipe-json">{"title":"Ninja OL650 Panko Crumbed Fish Fillets","slug":"ninja-ol650-panko-crumbed-fish-fillets","description":"Crispy panko crumbed fish fillets air fried on the Reversible Rack — confirmed and tested.","exported_at":"2026-08-31T14:05:14.428Z","base_servings":4,"servings_unit":"servings","ingredients":[{"id":"fish","name":"fish fillets","amount":4,"amount_max":null,"amount_text":"","unit":"fillets","note":"2–2.5cm thick, cod or salmon","group":"","scalable":true},{"id":"flour","name":"plain flour","amount":4,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","group":"","scalable":true},{"id":"eggs","name":"eggs","amount":2,"amount_max":null,"amount_text":"","unit":"","note":"beaten","group":"","scalable":true},{"id":"panko","name":"panko breadcrumbs","amount":1,"amount_max":null,"amount_text":"","unit":"cup","note":"","group":"","scalable":true},{"id":"oil","name":"oil spray","amount":1,"amount_max":null,"amount_text":"","unit":"spray","note":"","group":"","scalable":true}],"steps":[{"id":"step-1","title":"Set up the coating stations","content":"Set up three shallow bowls: flour in the first, beaten eggs in the second, panko in the third.","group":"","timer_seconds":null,"number":1},{"id":"step-2","title":"Dredge","content":"Dredge each fillet through the flour, then the egg, then the panko. Press the panko firmly to coat.","group":"","timer_seconds":null,"number":2},{"id":"step-3","title":"Place on the rack","content":"Place the fillets on the Reversible Rack in the upper/higher position. Do not use the Cook & Crisp Basket.","group":"","timer_seconds":null,"number":3},{"id":"step-4","title":"Spray with oil","content":"Spray oil generously over both sides of each fillet.","group":"","timer_seconds":null,"number":4},{"id":"step-5","title":"Air fry","content":"Select Air Fry → 200°C → 12 minutes. Press START. Adjust ±1–2 minutes for thickness.","group":"","timer_seconds":360,"number":5},{"id":"step-6","title":"Flip and re-spray","content":"At 6 minutes, open the lid, flip each fillet and re-spray with oil.","group":"","timer_seconds":360,"number":6},{"id":"step-7","title":"Finish cooking","content":"Cook the remaining time until golden and crispy. Serve immediately.","group":"","timer_seconds":null,"number":7}],"notes":["Rack position matters — Reversible Rack upper/higher position, not the Cook & Crisp Basket.","Spray oil both sides before cooking and again at the flip.","Adjust cook time ±1–2 minutes depending on fillet thickness."],"meta":{"cook_time":"12 min","difficulty":"Easy","equipment":"Ninja OL650, Reversible Rack"}}</script>
 <script>
 try {
   window.RECIPE_DATA = JSON.parse(document.getElementById('recipe-json').textContent);
@@ -799,6 +799,83 @@ function scaledAmountWithUnit(ingredient, factor) {
   const scaled = ingredient.amount * factor;
   const unit = formatUnit(ingredient.unit, ingredient.amount_max ? null : scaled);
   return unit ? amount + ' ' + unit : amount;
+}
+
+/**
+ * Light, dark, or follow the system — one implementation for every page this
+ * repo builds.
+ *
+ * Inlined into the recipe cards, the index and the planner with its `export`
+ * keywords stripped, the same trick format.js uses. The point of sharing it is
+ * the storage key: the choice is remembered once, for the whole site, so
+ * picking dark on the index and then opening a recipe does not throw you back
+ * into light.
+ */
+
+var THEME_KEY = 'ninja-recipe:theme';
+var THEMES = ['auto', 'light', 'dark'];
+
+function readTheme(fallback) {
+  try {
+    var stored = window.localStorage.getItem(THEME_KEY);
+    if (stored && THEMES.indexOf(stored) !== -1) return stored;
+  } catch (err) { /* private mode or blocked storage — the page still works */ }
+  return THEMES.indexOf(fallback) !== -1 ? fallback : 'auto';
+}
+
+function writeTheme(theme) {
+  try {
+    window.localStorage.setItem(THEME_KEY, theme);
+  } catch (err) { /* nothing to do */ }
+}
+
+/** auto -> light -> dark -> auto. */
+function nextTheme(theme) {
+  return theme === 'auto' ? 'light' : theme === 'light' ? 'dark' : 'auto';
+}
+
+/**
+ * Put a theme on the page. "auto" means no attribute at all, leaving the CSS
+ * to follow prefers-color-scheme.
+ */
+function applyTheme(theme) {
+  var root = document.documentElement;
+  if (theme === 'light' || theme === 'dark') root.setAttribute('data-theme', theme);
+  else root.removeAttribute('data-theme');
+
+  var button = document.getElementById('theme-toggle');
+  if (button) {
+    button.textContent = theme === 'dark' ? '☾' : theme === 'light' ? '☀' : '◐';
+    button.setAttribute('aria-label', 'Theme: ' + theme + '. Click to change.');
+    button.title = 'Theme: ' + theme;
+  }
+  return theme;
+}
+
+/**
+ * Apply the stored theme and wire the page's #theme-toggle, if it has one.
+ *
+ * `fallback` is used when nothing is stored site-wide yet. Pages that kept
+ * their own setting before this was shared pass it here, so a choice made
+ * earlier survives rather than silently resetting.
+ *
+ * `onChange` lets a page keep its own copy in step — the cards still write
+ * theme into their per-recipe state, so an older build reading that state
+ * finds what it expects.
+ */
+function initTheme(fallback, onChange) {
+  var theme = applyTheme(readTheme(fallback));
+  writeTheme(theme);
+
+  var button = document.getElementById('theme-toggle');
+  if (button) {
+    button.addEventListener('click', function () {
+      theme = applyTheme(nextTheme(theme));
+      writeTheme(theme);
+      if (onChange) onChange(theme);
+    });
+  }
+  return theme;
 }
 
 /**
@@ -1064,27 +1141,6 @@ function scaledAmountWithUnit(ingredient, factor) {
     updateTitle();
   }
 
-  /* ---------------- theme ---------------- */
-
-  function applyTheme() {
-    var root = document.documentElement;
-    if (state.theme === 'auto') root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme', state.theme);
-    var button = document.getElementById('theme-toggle');
-    if (button) {
-      var icon = state.theme === 'dark' ? '☾' : state.theme === 'light' ? '☀' : '◐';
-      button.textContent = icon;
-      button.setAttribute('aria-label', 'Theme: ' + state.theme + '. Click to change.');
-      button.title = 'Theme: ' + state.theme;
-    }
-  }
-
-  function cycleTheme() {
-    state.theme = state.theme === 'auto' ? 'light' : state.theme === 'light' ? 'dark' : 'auto';
-    applyTheme();
-    saveState();
-  }
-
   /* ---------------- wiring ---------------- */
 
   function resetAll() {
@@ -1106,7 +1162,13 @@ function scaledAmountWithUnit(ingredient, factor) {
 
   function init() {
     loadState();
-    applyTheme();
+    // Theme is site-wide now (see shared/theme.js). This card's older
+    // per-recipe setting is the fallback, so a choice made before it was
+    // shared survives, and it keeps being written back into that state.
+    initTheme(state.theme, function (theme) {
+      state.theme = theme;
+      saveState();
+    });
     renderAmounts();
     applyChecks();
 
@@ -1129,8 +1191,6 @@ function scaledAmountWithUnit(ingredient, factor) {
     var printBtn = document.getElementById('print-button');
     if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
 
-    var themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn) themeBtn.addEventListener('click', cycleTheme);
 
     var resetBtn = document.getElementById('reset-button');
     if (resetBtn) resetBtn.addEventListener('click', resetAll);

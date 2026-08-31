@@ -245,10 +245,12 @@ npm run planner                     # rebuild docs/planner.html
 npm run planner shopping 2026-W36   # print a week's list, no browser needed
 ```
 
-Plans are JSON files committed under `planner/data/plans/`, one per ISO week —
-shared between people by git, like the recipes. There is no server and no
-account. Full documentation, including the shopping-list merging rules, is in
-[`planner/README.md`](planner/README.md).
+Two people share one plan: send the other cook the link and their edits land on
+your planner, with no account and nothing to install. Plans are also snapshotted
+as JSON under `planner/data/plans/`, one per ISO week, which is both the archive
+and what the page falls back to offline. Full documentation, including the
+shopping-list merging rules and how the sync is wired without publishing an API
+key, is in [`planner/README.md`](planner/README.md).
 
 ## Layout
 

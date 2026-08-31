@@ -1,8 +1,8 @@
 # Meal planner
 
 A weekly meal plan and an automatic shopping list, built from the same recipe
-sources as the rest of the site. No account, no server, no database — the plan
-is a JSON file in this repo and the page is one self-contained HTML file.
+sources as the rest of the site. Open the link, edit a day, and it is on the
+other cook's planner — no account, nothing to install, no app.
 
 **Live: https://monnas69.github.io/Recipes/planner.html**
 
@@ -22,36 +22,61 @@ Those meals have no ingredients, so **they add nothing to the shopping list**.
 The list names them at the bottom instead of pretending they are not there —
 knowing the list ignores a meal is what stops you coming home without it.
 
-Edits are kept in the browser as a draft, so closing the tab loses nothing —
-there is no save button because there is nothing to save. What the bar at the
-top offers is *sharing*: a draft is only yours until it is committed, and that
-takes the one step below. The name field, "Copy JSON" and "Discard changes" sit
-behind the "…" beside it, so the usual case is one button.
+Edits save themselves. There is no save button because there is nothing to
+press: a change is written to the browser as you make it, and to the shared
+plan a moment later. The bar at the top is a status line, not a form — it says
+"Saved for both of you", or that you are offline and it will catch up.
 
 ## Sharing a plan between two people
 
-The plan is shared through git, the same way recipes are.
+Send the other cook the link. That is the whole setup.
+
+Both planners edit one shared copy of the week. Their change appears on your
+page within about twenty seconds, or immediately when you switch back to the
+tab. Neither of you needs an account, a token, or the repo.
+
+### When you both edit at once
+
+Every save carries the revision it was based on, and the server refuses one
+based on a revision that has moved on. So the second save is never a silent
+overwrite: that page shows "Someone else saved this week while you were
+editing" and asks whether to keep yours or take theirs.
+
+### When you are offline
+
+Edits go to the browser first, so a tunnel or a dead signal changes nothing you
+can see. The bar says it will sync when you are back, and it does — including
+the conflict check, so an edit made offline still cannot clobber one made in
+the meantime.
+
+### How it is wired
+
+The page holds **no API key**. It calls one endpoint — a Supabase Edge Function
+that keeps the service key server-side and can read and write exactly one
+table, `meal_plans`.
+
+That indirection is the point. The database lives in a project whose other
+tables (groceries, fuel, tipping) are readable *and writable* by `anon`, so
+publishing that project's key on a public site would have put all of it on the
+internet. The function exposes the meal plan and nothing else, and the table
+itself has RLS on with no policies at all, so even a leaked anon key cannot
+reach it.
+
+Anyone with the planner link can edit the plan. That is deliberate — it is what
+makes "just send Karen the link" work — and the blast radius is a wrong
+shopping list.
+
+### Keeping the repo as the archive
+
+Git is no longer how plans travel, but it is still where they are kept:
 
 ```bash
-# after pressing "Share this plan" in the page
-npm run planner import ~/Downloads/2026-W36.json
+npm run planner pull 2026-W36
 git add planner/data/plans && git commit -m "Plan 2026-W36" && git push
 ```
 
-The other person pulls (or just waits for the site to rebuild) and their page
-picks the plan up. `import` validates the file, refuses to save a plan
-referencing a recipe that no longer exists, and bumps the plan's `revision`.
-
-That revision is what makes two devices safe. Each browser remembers which
-revision its draft was based on; if the other person publishes in the meantime,
-the page says so and asks whether to keep your edits or take theirs, instead of
-one of you silently overwriting the other.
-
-This is the deliberate v1 trade: a manual commit per plan, in exchange for no
-server to run and no service to depend on. Weekly planning is a once-a-week
-act, so the friction lands about once a week. If it starts to grate, the step
-to automate is `import` + commit + push behind a single local command — the
-page already produces exactly the file that flow needs.
+Committed plans are also the fallback the page falls back to when it cannot
+reach the shared planner, and what a build with no `sync.json` uses on its own.
 
 ## Command line
 
@@ -59,6 +84,7 @@ page already produces exactly the file that flow needs.
 npm run planner                        # rebuild docs/planner.html
 npm run planner show                   # this week's plan
 npm run planner shopping 2026-W36      # a week's shopping list, as text
+npm run planner pull [week]            # snapshot the live plan into the repo
 npm run planner import <file> [week]   # save a downloaded plan
 npm run planner -- --help
 ```
@@ -101,6 +127,8 @@ planner/shared/shopping.js  aggregation (shared with the browser)
 planner/shared/planner-client.js   the page's runtime
 planner/shared/planner.css  styles, layered on src/shared/card.css
 planner/data/plans/         one committed JSON file per week
+planner/data/sync.json      where the live plan lives (an endpoint, never a key)
+planner/shared/sync.js      talking to it, shared with the CLI
 ```
 
 `week.js` and `shopping.js` are imported by Node **and** inlined into the page

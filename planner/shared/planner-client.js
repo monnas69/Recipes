@@ -26,6 +26,12 @@
 
   var recipes = data.recipes || [];
   var published = data.plans || {};
+  var sync = data.sync || null;
+
+  /** Debounce on saving: a burst of typing is one write, not twenty. */
+  var PUSH_DELAY_MS = 900;
+  /** How often to look for the other cook's edits while the tab is in front. */
+  var POLL_MS = 20000;
   var recipesBySlug = {};
   for (var i = 0; i < recipes.length; i += 1) recipesBySlug[recipes[i].slug] = recipes[i];
 
@@ -34,7 +40,13 @@
     plan: null,
     target: null,
     ticked: {},
-    toastTimer: null
+    toastTimer: null,
+    // The server's copy per week, once fetched. It outranks the plan committed
+    // to git: git is the archive now, not the way plans reach each other.
+    remote: {},
+    syncState: syncEnabled(sync) ? 'idle' : 'off',
+    pushTimer: null,
+    pollTimer: null
   };
 
   var el = {};
@@ -71,9 +83,14 @@
     return plan;
   }
 
+  /**
+   * The copy this page is editing *against* — the server's if we have it, the
+   * one committed to git otherwise. Everything that asks "has this changed?"
+   * or "what revision am I based on?" goes through here.
+   */
   function publishedPlan(week) {
-    var stored = published[week];
-    return stored ? clone(stored) : emptyPlan(week);
+    var stored = state.remote[week] || published[week];
+    return stored ? normalise(clone(stored), week) : emptyPlan(week);
   }
 
   function clone(value) {
@@ -126,6 +143,8 @@
       state.plan = publishedPlan(week);
     }
     render();
+    // Render first, fetch second: the page is usable before the network is.
+    pullRemote(week);
   }
 
   /** Re-shape anything read back from storage so the rest of the code can trust it. */
@@ -158,6 +177,102 @@
       plan.days[dates[d]] = kept;
     }
     return plan;
+  }
+
+  /* ---------------- sync ---------------- */
+
+  function setSyncState(next) {
+    if (state.syncState === 'off') return;
+    state.syncState = next;
+    renderSaveBar();
+  }
+
+  /**
+   * Does this browser hold edits of its own for a week? The stored draft is the
+   * only honest answer. isDirty() cannot be used for it: once the server has
+   * the other cook's changes, this page's plan differs from the published one
+   * whether the difference came from here or from them — and treating their
+   * work as "my unsaved edits" means never displaying it.
+   */
+  function hasLocalEdits(week) {
+    return !!readStore(DRAFT_PREFIX + week);
+  }
+
+  /**
+   * Take the server's copy of a week. With no local edits, adopt it outright —
+   * that is the other cook's work arriving. With local edits, leave them alone:
+   * publishedPlan now points at the newer revision, so draftIsStale raises the
+   * conflict banner instead of one of them quietly losing.
+   */
+  function adoptRemote(week, plan) {
+    if (!plan) return;
+    state.remote[week] = plan;
+    if (week !== state.week) return;
+    if (!hasLocalEdits(week)) state.plan = publishedPlan(week);
+    render();
+  }
+
+  function pullRemote(week) {
+    if (!syncEnabled(sync)) return;
+    pullPlan(sync, week).then(function (result) {
+      if (!result.ok) {
+        setSyncState('offline');
+        return;
+      }
+      setSyncState('synced');
+      if (result.plan) adoptRemote(week, result.plan);
+      else if (week === state.week && !isDirty()) render();
+    });
+  }
+
+  function schedulePush() {
+    if (!syncEnabled(sync)) return;
+    if (state.pushTimer) clearTimeout(state.pushTimer);
+    setSyncState('saving');
+    state.pushTimer = setTimeout(pushRemote, PUSH_DELAY_MS);
+  }
+
+  function pushRemote() {
+    if (!syncEnabled(sync) || !isDirty()) return;
+    var week = state.week;
+    var base = publishedPlan(week).revision || 0;
+    var days = clone(state.plan.days);
+    var author = el.author.value.trim().slice(0, 60);
+
+    pushPlan(sync, week, days, base, author).then(function (result) {
+      if (result.ok) {
+        // The server's copy is now this copy, so nothing is outstanding: the
+        // draft goes, and the bar can honestly say it is saved for both.
+        state.remote[week] = result.plan;
+        if (week === state.week) {
+          state.plan = publishedPlan(week);
+          clearStore(DRAFT_PREFIX + week);
+        }
+        setSyncState('synced');
+        render();
+        return;
+      }
+      if (result.stale) {
+        // The other cook saved first. Keep this page's edits and let the
+        // conflict banner ask which one wins — never overwrite silently.
+        if (result.plan) state.remote[week] = result.plan;
+        setSyncState('conflict');
+        render();
+        return;
+      }
+      setSyncState('offline');
+    });
+  }
+
+  function startPolling() {
+    if (!syncEnabled(sync) || state.pollTimer) return;
+    state.pollTimer = setInterval(function () {
+      if (document.visibilityState === 'visible') pullRemote(state.week);
+    }, POLL_MS);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') pullRemote(state.week);
+    });
+    window.addEventListener('online', function () { pullRemote(state.week); pushRemote(); });
   }
 
   function persistDraft() {
@@ -233,6 +348,7 @@
   function changed() {
     persistDraft();
     render();
+    schedulePush();
   }
 
   /* ---------------- rendering ---------------- */
@@ -517,30 +633,55 @@
     el.shoppingList.innerHTML = html;
   }
 
+  /** Who last touched the shared copy, when we know. */
+  function lastChangedBy(plan) {
+    if (!plan.updated_by) return '';
+    return ' — last changed by ' + plan.updated_by;
+  }
+
   function renderSaveBar() {
     var dirty = isDirty();
-    var stale = draftIsStale();
+    var stale = draftIsStale() || state.syncState === 'conflict';
+    var plan = publishedPlan(state.week);
     el.saveBar.dataset.state = dirty ? 'dirty' : 'clean';
 
-    if (dirty) {
-      // Every edit is already in localStorage — saying "unsaved" was a lie that
-      // made a shared-with-the-other-cook question look like a data-loss one.
-      el.saveText.textContent = 'Saved on this device. Share it to put it on the other cook\u2019s planner.';
+    if (state.syncState === 'off') {
+      // No endpoint in this build: the old download-and-commit flow, unchanged.
+      el.saveText.textContent = dirty
+        ? 'Saved on this device. Share it to put it on the other cook\u2019s planner.'
+        : (plan.revision
+          ? 'Shared — revision ' + plan.revision
+            + (plan.updated_at ? ' on ' + plan.updated_at.slice(0, 10) : '')
+            + (plan.updated_by ? ' by ' + plan.updated_by : '')
+          : 'Nothing shared for this week yet.');
+    } else if (state.syncState === 'conflict') {
+      el.saveText.textContent = 'Someone else saved this week while you were editing.';
+    } else if (state.syncState === 'offline') {
+      el.saveText.textContent = 'Saved on this device — it will sync when you are back online.';
+    } else if (dirty || state.syncState === 'saving') {
+      el.saveText.textContent = 'Saving…';
     } else {
-      var plan = publishedPlan(state.week);
       el.saveText.textContent = plan.revision
-        ? 'Shared — revision ' + plan.revision
-          + (plan.updated_at ? ' on ' + plan.updated_at.slice(0, 10) : '')
-          + (plan.updated_by ? ' by ' + plan.updated_by : '')
-        : 'Nothing shared for this week yet.';
+        ? 'Saved for both of you' + lastChangedBy(plan)
+        : 'Nothing planned for this week yet.';
     }
+
     el.discardButton.hidden = !dirty;
     el.conflictBanner.hidden = !(stale && dirty);
-    // Nothing worth expanding for on a week with no edits and nothing shared.
-    el.moreToggle.hidden = !dirty && !publishedPlan(state.week).revision;
-    if (el.moreToggle.hidden) {
-      el.saveMore.hidden = true;
-      el.moreToggle.setAttribute('aria-expanded', 'false');
+
+    // With sync on, downloading is an archive step rather than how the plan
+    // gets shared, so it moves out of the way.
+    var live = state.syncState !== 'off';
+    el.downloadButton.hidden = live;
+    el.downloadCopy.hidden = !live;
+    el.moreToggle.hidden = false;
+    if (!live) {
+      // Nothing worth expanding for on a week with no edits and nothing shared.
+      el.moreToggle.hidden = !dirty && !plan.revision;
+      if (el.moreToggle.hidden) {
+        el.saveMore.hidden = true;
+        el.moreToggle.setAttribute('aria-expanded', 'false');
+      }
     }
   }
 
@@ -631,6 +772,8 @@
     el.author = document.getElementById('author');
     el.moreToggle = document.getElementById('more-toggle');
     el.saveMore = document.getElementById('save-more');
+    el.downloadButton = document.getElementById('download-button');
+    el.downloadCopy = document.getElementById('download-copy');
     el.toast = document.getElementById('toast');
 
     document.getElementById('prev-week').addEventListener('click', function () {
@@ -649,7 +792,8 @@
       el.moreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
-    document.getElementById('download-button').addEventListener('click', download);
+    el.downloadButton.addEventListener('click', download);
+    el.downloadCopy.addEventListener('click', download);
     document.getElementById('copy-plan').addEventListener('click', function () {
       copyText(JSON.stringify(planForExport(), null, 2), 'Plan JSON copied');
     });
@@ -667,7 +811,7 @@
     document.getElementById('take-published').addEventListener('click', function () {
       clearStore(DRAFT_PREFIX + state.week);
       loadWeek(state.week);
-      toast('Loaded the committed plan');
+      toast('Loaded the other cook\u2019s plan');
     });
     document.getElementById('keep-mine').addEventListener('click', function () {
       // Re-base the draft on the current revision: the cook has seen the
@@ -677,7 +821,10 @@
         base_revision: publishedPlan(state.week).revision || 0,
         saved_at: new Date().toISOString()
       });
+      // Rebased on their revision, so this can now be saved over the top.
+      if (state.syncState === 'conflict') setSyncState('saving');
       render();
+      schedulePush();
     });
 
     document.getElementById('theme-toggle').addEventListener('click', function () {
@@ -791,4 +938,5 @@
   applyTheme(readStore(THEME_KEY) || 'auto');
   bind();
   loadWeek(data.week);
+  startPolling();
 })();

@@ -28,6 +28,7 @@ const CARD_CSS = readCardAsset('card.css');
 const PLANNER_CSS = readAsset('planner.css');
 const FORMAT_JS = inlineModule(readCardAsset('format.js'));
 const WEEK_JS = inlineModule(readAsset('week.js'));
+const SYNC_JS = inlineModule(readAsset('sync.js'));
 const SHOPPING_JS = inlineModule(readAsset('shopping.js'));
 const CLIENT_JS = readAsset('planner-client.js');
 
@@ -76,7 +77,8 @@ export function renderPlanner(options = {}) {
   const plans = {};
   for (const plan of options.plans || []) plans[plan.week] = plan;
 
-  const payload = { week, recipes, plans, plansDir, generatedAt };
+  // `sync` carries an endpoint and never a key — see planner/shared/sync.js.
+  const payload = { week, recipes, plans, plansDir, generatedAt, sync: options.sync || null };
   const backLink = options.backLink
     ? `<a class="back-link" href="${escapeHtml(options.backLink)}">← All recipes</a>`
     : '';
@@ -134,6 +136,7 @@ ${PLANNER_CSS}
       <label class="sr-only" for="author">Your name</label>
       <input type="text" id="author" class="author-input" placeholder="Your name" size="10">
       <button type="button" id="copy-plan">Copy JSON</button>
+      <button type="button" id="download-copy" hidden>Download a copy</button>
       <button type="button" id="discard-button" hidden>Discard changes</button>
     </div>
   </div>
@@ -200,6 +203,7 @@ try {
 <script>
 ${FORMAT_JS}
 ${WEEK_JS}
+${SYNC_JS}
 ${SHOPPING_JS}
 ${CLIENT_JS}
 </script>

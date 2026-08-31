@@ -1,0 +1,4 @@
+{
+  "endpoint": "https://ekwpikmfezwusibrvegb.supabase.co/functions/v1/meal-plan",
+  "note": "No API key here on purpose. The endpoint is a Supabase Edge Function that holds the service key server-side and can touch only the meal_plans table; the project's own anon key is never published, so nothing else in that project is reachable from this page."
+}

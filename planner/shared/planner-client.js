@@ -523,17 +523,25 @@
     el.saveBar.dataset.state = dirty ? 'dirty' : 'clean';
 
     if (dirty) {
-      el.saveText.textContent = 'Unsaved changes — download the JSON and commit it to share this plan.';
+      // Every edit is already in localStorage — saying "unsaved" was a lie that
+      // made a shared-with-the-other-cook question look like a data-loss one.
+      el.saveText.textContent = 'Saved on this device. Share it to put it on the other cook\u2019s planner.';
     } else {
       var plan = publishedPlan(state.week);
       el.saveText.textContent = plan.revision
-        ? 'Saved — revision ' + plan.revision
-          + (plan.updated_at ? ', published ' + plan.updated_at.slice(0, 10) : '')
+        ? 'Shared — revision ' + plan.revision
+          + (plan.updated_at ? ' on ' + plan.updated_at.slice(0, 10) : '')
           + (plan.updated_by ? ' by ' + plan.updated_by : '')
-        : 'No plan committed for this week yet.';
+        : 'Nothing shared for this week yet.';
     }
     el.discardButton.hidden = !dirty;
     el.conflictBanner.hidden = !(stale && dirty);
+    // Nothing worth expanding for on a week with no edits and nothing shared.
+    el.moreToggle.hidden = !dirty && !publishedPlan(state.week).revision;
+    if (el.moreToggle.hidden) {
+      el.saveMore.hidden = true;
+      el.moreToggle.setAttribute('aria-expanded', 'false');
+    }
   }
 
   /* ---------------- saving ---------------- */
@@ -557,7 +565,7 @@
     link.click();
     document.body.removeChild(link);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    toast('Saved ' + state.week + '.json — commit it to ' + data.plansDir + '/');
+    toast('Downloaded ' + state.week + '.json — commit it to ' + data.plansDir + '/ to share it');
   }
 
   function copyText(text, message) {
@@ -621,6 +629,8 @@
     el.discardButton = document.getElementById('discard-button');
     el.conflictBanner = document.getElementById('conflict-banner');
     el.author = document.getElementById('author');
+    el.moreToggle = document.getElementById('more-toggle');
+    el.saveMore = document.getElementById('save-more');
     el.toast = document.getElementById('toast');
 
     document.getElementById('prev-week').addEventListener('click', function () {
@@ -631,6 +641,12 @@
     });
     document.getElementById('this-week').addEventListener('click', function () {
       loadWeek(currentWeekId(new Date()));
+    });
+
+    el.moreToggle.addEventListener('click', function () {
+      var open = el.saveMore.hidden;
+      el.saveMore.hidden = !open;
+      el.moreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
     document.getElementById('download-button').addEventListener('click', download);

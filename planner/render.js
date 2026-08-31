@@ -126,11 +126,15 @@ ${PLANNER_CSS}
   <div class="save-bar no-print" id="save-bar" data-state="clean">
     <span id="save-text"></span>
     <div class="save-actions">
+      <button type="button" id="download-button" class="primary">Share this plan</button>
+      <button type="button" class="round" id="more-toggle" aria-expanded="false"
+        aria-controls="save-more" aria-label="More options for this plan">⋯</button>
+    </div>
+    <div class="save-more" id="save-more" hidden>
       <label class="sr-only" for="author">Your name</label>
       <input type="text" id="author" class="author-input" placeholder="Your name" size="10">
-      <button type="button" id="discard-button" hidden>Discard changes</button>
       <button type="button" id="copy-plan">Copy JSON</button>
-      <button type="button" id="download-button">Download plan</button>
+      <button type="button" id="discard-button" hidden>Discard changes</button>
     </div>
   </div>
 

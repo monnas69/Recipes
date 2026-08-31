@@ -69,6 +69,12 @@ test('the planner plans a week and builds a shopping list in a real browser', as
     page.on('dialog', (dialog) => dialog.accept());
     await page.goto(url);
 
+    // The name field, "Copy JSON" and "Discard" sit behind the "…" toggle, so
+    // the bar shows one action; open it when a test needs one of them.
+    const openMore = async () => {
+      if (await page.locator('#save-more').isHidden()) await page.click('#more-toggle');
+    };
+
     // Just the quantity and the name — not the "which recipes" footnote.
     const shoppingLines = () => page.$$eval('.shopping-item label', (els) => els.map((el) => {
       const clone = el.cloneNode(true);
@@ -80,11 +86,24 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       assert.equal(await page.textContent('#week-name'), WEEK);
       assert.equal(await page.textContent('#week-range'), '31 Aug – 6 Sep 2026');
       assert.equal(await page.locator('.day').count(), 7);
-      assert.match(await page.textContent('#save-text'), /Saved — revision 1.*by shayne/);
+      assert.match(await page.textContent('#save-text'), /Shared — revision 1.*by shayne/);
       assert.match(await page.textContent(`.day[data-date="${MONDAY}"]`), /Lemon Garlic Butter Shrimp/);
       assert.match(await page.textContent(`.day[data-date="${MONDAY}"]`), /4 servings/);
       assert.equal(await page.locator('.day[data-date="2026-09-06"] .freeform-input').inputValue(),
         'Leftovers', 'a committed meal with no recipe is part of the week');
+    });
+
+    await t.test('the save bar offers one action, not a form', async () => {
+      assert.equal(await page.locator('#download-button').isVisible(), true);
+      assert.equal(await page.locator('#save-more').isVisible(), false,
+        'the name field, Copy JSON and Discard start collapsed');
+
+      await openMore();
+      assert.equal(await page.locator('#save-more').isVisible(), true);
+      assert.equal(await page.getAttribute('#more-toggle', 'aria-expanded'), 'true');
+
+      await page.click('#more-toggle');
+      assert.equal(await page.locator('#save-more').isVisible(), false, 'and it shuts again');
     });
 
     await t.test('the shopping list reflects the planned servings', async () => {
@@ -100,7 +119,10 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       await page.click('.recipe-option[data-slug="pad-see-ew-thai-stir-fried-noodles"]');
       assert.match(await page.textContent('.day[data-date="2026-09-02"]'), /Pad See Ew/);
       assert.match(await page.textContent('#shopping-count'), /from 2 meals/);
-      assert.match(await page.textContent('#save-text'), /Unsaved changes/);
+      const bar = await page.textContent('#save-text');
+      assert.match(bar, /Saved on this device/);
+      assert.doesNotMatch(bar, /Unsaved|lost/,
+        'the draft is already in localStorage — this is a sharing prompt, not a warning');
 
       // Garlic is in both recipes, so the two lines must have become one.
       const garlic = (await shoppingLines()).filter((line) => /garlic$/.test(line));
@@ -133,7 +155,7 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       assert.equal(await page.locator('.shopping-item input[type="checkbox"]').first().isChecked(), true);
       assert.match(await page.textContent('.day[data-date="2026-09-02"]'), /Pad See Ew/,
         'the unsaved draft is still there');
-      assert.match(await page.textContent('#save-text'), /Unsaved changes/);
+      assert.match(await page.textContent('#save-text'), /Saved on this device/);
     });
 
     await t.test('removing an assignment empties the day', async () => {
@@ -142,8 +164,9 @@ test('the planner plans a week and builds a shopping list in a real browser', as
     });
 
     await t.test('discarding restores the committed plan', async () => {
+      await openMore();
       await page.click('#discard-button');
-      assert.match(await page.textContent('#save-text'), /Saved — revision 1/);
+      assert.match(await page.textContent('#save-text'), /Shared — revision 1/);
       assert.match(await page.textContent(`.day[data-date="${MONDAY}"]`), /4 servings/,
         'the committed servings are back');
     });
@@ -151,7 +174,7 @@ test('the planner plans a week and builds a shopping list in a real browser', as
     await t.test('week navigation moves and comes back', async () => {
       await page.click('#next-week');
       assert.equal(await page.textContent('#week-name'), '2026-W37');
-      assert.match(await page.textContent('#save-text'), /No plan committed/);
+      assert.match(await page.textContent('#save-text'), /Nothing shared for this week/);
       assert.equal(await page.locator('.shopping-item').count(), 0);
 
       await page.click('#prev-week');
@@ -174,7 +197,7 @@ test('the planner plans a week and builds a shopping list in a real browser', as
         'a meal with no recipe adds nothing to buy');
       assert.match(await page.textContent('#shopping-freeform'), /Bangers and mash/);
       assert.match(await page.textContent('#shopping-count'), /2 without recipes/);
-      assert.match(await page.textContent('#save-text'), /Unsaved changes/);
+      assert.match(await page.textContent('#save-text'), /Saved on this device/);
     });
 
     await t.test('renaming a free-text meal registers as an edit', async () => {
@@ -184,7 +207,7 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       const sunday = page.locator('.day[data-date="2026-09-06"] .freeform-input');
       await sunday.fill('Fish and chips');
       await sunday.dispatchEvent('change');
-      assert.match(await page.textContent('#save-text'), /Unsaved changes/);
+      assert.match(await page.textContent('#save-text'), /Saved on this device/);
 
       await page.reload();
       assert.equal(await page.locator('.day[data-date="2026-09-06"] .freeform-input').inputValue(),
@@ -199,6 +222,7 @@ test('the planner plans a week and builds a shopping list in a real browser', as
     });
 
     await t.test('the downloaded plan is the JSON the CLI expects', async () => {
+      await openMore();
       await page.fill('#author', 'karen');
       await page.click(`.day[data-date="2026-09-04"] [data-add]`);
       await page.click('.recipe-option[data-slug="ninja-ol650-chicken-wings"]');
@@ -244,13 +268,13 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       await page.click('#keep-mine');
       assert.equal(await page.locator('#conflict-banner').isVisible(), false, 'the choice sticks');
       assert.match(await page.textContent('.day[data-date="2026-09-05"]'), /Pad See Ew/);
-      assert.match(await page.textContent('#save-text'), /Unsaved changes/);
+      assert.match(await page.textContent('#save-text'), /Saved on this device/);
 
       await seedStaleDraft();
       await page.reload();
       await page.click('#take-published');
       assert.equal(await page.locator('#conflict-banner').isVisible(), false);
-      assert.match(await page.textContent('#save-text'), /Saved — revision 1/);
+      assert.match(await page.textContent('#save-text'), /Shared — revision 1/);
       assert.match(await page.textContent('.day[data-date="2026-09-05"]'), /Nothing planned/);
       assert.match(await page.textContent(`.day[data-date="${MONDAY}"]`), /Lemon Garlic Butter Shrimp/);
     });

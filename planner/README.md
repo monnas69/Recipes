@@ -22,15 +22,18 @@ Those meals have no ingredients, so **they add nothing to the shopping list**.
 The list names them at the bottom instead of pretending they are not there —
 knowing the list ignores a meal is what stops you coming home without it.
 
-Edits are kept in the browser as a draft, so closing the tab loses nothing.
-A draft is only *yours*, though — sharing it takes one more step.
+Edits are kept in the browser as a draft, so closing the tab loses nothing —
+there is no save button because there is nothing to save. What the bar at the
+top offers is *sharing*: a draft is only yours until it is committed, and that
+takes the one step below. The name field, "Copy JSON" and "Discard changes" sit
+behind the "…" beside it, so the usual case is one button.
 
 ## Sharing a plan between two people
 
 The plan is shared through git, the same way recipes are.
 
 ```bash
-# after pressing "Download plan" in the page
+# after pressing "Share this plan" in the page
 npm run planner import ~/Downloads/2026-W36.json
 git add planner/data/plans && git commit -m "Plan 2026-W36" && git push
 ```

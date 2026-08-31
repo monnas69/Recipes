@@ -50,7 +50,12 @@ jobs:
       - name: No API key anywhere in the repo
         if: matrix.node == '22'
         run: |
-          if grep -rInE 'eyJhbGciOi|sb_publishable_|sb_secret_|service_role|SUPABASE_SERVICE_ROLE_KEY' . \
+          # The single-character brackets stop this line from matching itself
+          # while leaving the regex exactly as strict. Excluding this file
+          # instead would leave a blind spot in the one place a key gets pasted
+          # by accident.
+          pattern='eyJhbGci[O]i|sb_publisha[b]le_|sb_secr[e]t_|service_r[o]le|SUPABASE_SERVICE_R[O]LE_KEY'
+          if grep -rInE "$pattern" . \
               --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=test; then
             echo "::error::An API key looks committed. The planner page must ship an endpoint and never a key."
             exit 1

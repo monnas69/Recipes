@@ -1,5 +1,11 @@
 # Run the test suite on every pull request, and on main.
 #
+# checkout and setup-node are pinned to v7: v4 targets the Node 20 runtime,
+# which the runners now force onto Node 24 with a deprecation warning on every
+# run. v7 is built for node24. This project has no lockfile and no
+# packageManager field, so setup-node's automatic caching (added in v5) stays
+# dormant — with either, it would try to cache dependencies that do not exist.
+#
 # pages.yml also runs `npm test` before publishing, but Playwright is not
 # installed there, so the browser tests skip themselves silently — the most
 # valuable coverage in this repo never ran in CI. The `browser` job below is
@@ -31,9 +37,9 @@ jobs:
         # asserted; 24 is where the runners themselves are heading.
         node: ['18', '20', '22', '24']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
 
@@ -68,9 +74,9 @@ jobs:
     name: Browser tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
 

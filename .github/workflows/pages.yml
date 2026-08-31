@@ -41,7 +41,12 @@ jobs:
       - name: Build the site
         run: npm run site
 
-      - uses: actions/upload-pages-artifact@v3
+      # v3 wrapped upload-artifact@v4, which the runners now force onto Node 24
+      # with a deprecation warning; v5 wraps upload-artifact@v7. Note that from
+      # v4 this action excludes dotfiles from the artifact unless
+      # include-hidden-files is set — docs/ has none, and Pages serves the
+      # artifact directly with no Jekyll step, so nothing here needs one.
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs
 
@@ -53,4 +58,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

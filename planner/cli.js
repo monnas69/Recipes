@@ -4,7 +4,8 @@ import { parseArgs } from 'node:util';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { buildPlanner, loadRecipes, DEFAULTS } from './build.js';
+import { buildPlanner, loadRecipes, loadSyncConfig, DEFAULTS } from './build.js';
+import { pullPlan, syncEnabled } from './shared/sync.js';
 import {
   readPlan, writePlan, normalizePlan, planAssignments, missingSlugs, isEmptyPlan
 } from './plan-store.js';
@@ -16,6 +17,7 @@ const OPTIONS = {
   source: { type: 'string', default: DEFAULTS.source },
   out: { type: 'string', short: 'o', default: DEFAULTS.outDir },
   plans: { type: 'string', default: DEFAULTS.plansDir },
+  sync: { type: 'string', default: DEFAULTS.syncConfig },
   title: { type: 'string', default: DEFAULTS.title },
   by: { type: 'string' },
   quiet: { type: 'boolean', short: 'q', default: false },
@@ -34,6 +36,8 @@ Commands
   shopping [week]        print a week's shopping list
   import <file> [week]   validate a plan downloaded from the page and save it
                          into the plans folder, ready to commit
+  pull [week]            fetch the live plan from the shared planner and write
+                         it into the plans folder, ready to commit
 
 Meals without a recipe
   A day can hold a meal that is just a name — "bangers and mash", "leftovers".
@@ -46,19 +50,23 @@ Options
       --source <path>    recipe sources                     (default: recipes)
   -o, --out <dir>        output directory for build         (default: docs)
       --plans <dir>      plan storage  (default: planner/data/plans)
+      --sync <file>      shared planner config (default: planner/data/sync.json)
       --title <text>     heading for the page               (default: Meal planner)
       --by <name>        who saved this plan (import)
   -q, --quiet            only print errors
   -h, --help             show this help
 
 Sharing a plan
-  Plans are JSON files committed to the repo — there is no server. Edit the
-  week in the page, press "Download plan", then:
+  Both cooks edit the same live plan in the page — open the link, change a day,
+  and it is on the other one's planner. Nothing to install and no account.
 
-    meal-planner import ~/Downloads/2026-W36.json
+  The repo is the archive rather than the channel. To snapshot a week into git:
+
+    meal-planner pull 2026-W36
     git add planner/data/plans && git commit -m "Plan 2026-W36" && git push
 
-  The other cook pulls, and their page picks the new plan up on the next build.
+  The import command still takes a file downloaded from the page, for a build
+  with no shared planner configured.
 `;
 
 function resolveWeek(values, positional) {
@@ -169,6 +177,39 @@ export async function main(argv = process.argv.slice(2), io = console) {
         log(`\n${list.itemCount} item${list.itemCount === 1 ? '' : 's'} from `
           + `${list.recipeCount} meal${list.recipeCount === 1 ? '' : 's'}.`);
       }
+      return 0;
+    }
+
+    if (command === 'pull') {
+      const resolved = resolveWeek(values, positionals[1]);
+      if (resolved.error) { io.error(resolved.error); return 2; }
+
+      const config = await loadSyncConfig(values.sync);
+      if (!syncEnabled(config)) {
+        io.error(`No shared planner configured in ${values.sync} — nothing to pull from.`);
+        return 1;
+      }
+
+      const result = await pullPlan(config, resolved.week);
+      if (!result.ok) {
+        io.error('Could not reach the shared planner. Check the connection and try again.');
+        return 1;
+      }
+      if (!result.plan) {
+        log(`Nothing saved for ${resolved.week} yet.`);
+        return 0;
+      }
+
+      const plan = normalizePlan(result.plan, resolved.week);
+      if (!plan) { io.error(`The shared planner returned something that is not a plan.`); return 1; }
+
+      // Keep the server's revision: this is a snapshot of it, not a new edit.
+      const { plan: saved, file: written } = await writePlan(values.plans, plan, { bumpRevision: false });
+      const { bySlug } = await loadRecipes(values.source);
+      log(`Pulled ${saved.week} → ${path.relative(process.cwd(), written)} (revision ${saved.revision})`);
+      log(formatPlan(saved, bySlug));
+      log('\nCommit it to keep the archive current:');
+      log(`  git add ${values.plans} && git commit -m "Plan ${saved.week}" && git push`);
       return 0;
     }
 

@@ -46,7 +46,10 @@ test('the planner plans a week and builds a shopping list in a real browser', as
     }
   }, WEEK), { updatedBy: 'shayne' });
 
-  const { file } = await buildPlanner({ outDir, plansDir, week: WEEK });
+  // Sync off on purpose: this file guards the offline promise — the page works
+  // from a file:// path with no network at all. Sync is covered in
+  // planner-sync.test.js, against a stubbed server.
+  const { file } = await buildPlanner({ outDir, plansDir, week: WEEK, sync: null });
   const url = pathToFileURL(file).href;
 
   let browser;

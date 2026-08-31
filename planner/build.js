@@ -6,7 +6,7 @@
  * exactly the card the planner can schedule.
  */
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { collectRecipes } from '../src/export.js';
@@ -19,8 +19,25 @@ export const DEFAULTS = {
   outDir: 'docs',
   fileName: 'planner.html',
   plansDir: DEFAULT_PLANS_DIR,
+  syncConfig: 'planner/data/sync.json',
   title: 'Meal planner'
 };
+
+/**
+ * Where the page syncs plans to, if anywhere. Missing or malformed config is
+ * not an error: the planner falls back to the committed plans and the
+ * download-and-commit flow, which is how it worked before sync existed.
+ */
+export async function loadSyncConfig(file = DEFAULTS.syncConfig) {
+  if (!file) return null;
+  try {
+    const parsed = JSON.parse(await readFile(file, 'utf8'));
+    const endpoint = typeof parsed?.endpoint === 'string' ? parsed.endpoint.trim() : '';
+    return endpoint ? { endpoint } : null;
+  } catch {
+    return null;
+  }
+}
 
 /** Load every recipe the planner can schedule, indexed by slug. */
 export async function loadRecipes(source = DEFAULTS.source) {
@@ -42,6 +59,9 @@ export async function buildPlanner(options = {}) {
 
   const { recipes } = await loadRecipes(source);
   const plans = await readAllPlans(plansDir);
+  const sync = options.sync !== undefined
+    ? options.sync
+    : await loadSyncConfig(options.syncConfig ?? DEFAULTS.syncConfig);
 
   // The current week is always present, even before anyone has committed a
   // plan for it, so the page opens on an editable grid rather than an error.
@@ -54,6 +74,7 @@ export async function buildPlanner(options = {}) {
     plans,
     week,
     plansDir,
+    sync,
     title: options.title || DEFAULTS.title,
     backLink: options.backLink ?? 'index.html',
     generatedAt: options.generatedAt
@@ -63,5 +84,5 @@ export async function buildPlanner(options = {}) {
   const file = path.join(outDir, options.fileName || DEFAULTS.fileName);
   await writeFile(file, html, 'utf8');
 
-  return { file, recipes, plans, week };
+  return { file, recipes, plans, week, sync };
 }

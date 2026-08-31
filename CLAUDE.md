@@ -14,12 +14,17 @@ When adding a new confirmed/tested recipe source to `recipes/`:
 
 ## Publishing a meal plan
 
-Plans are JSON files under `planner/data/plans/`, one per ISO week. To save one
-downloaded from the planner page:
+The live plan is shared between both cooks through the `meal-plan` endpoint in
+`planner/data/sync.json`; the repo keeps snapshots under `planner/data/plans/`,
+one per ISO week. To archive the current live plan:
 
 ```bash
-npm run planner import <file>   # validates, bumps the revision, writes the file
+npm run planner pull [week]     # fetches the live plan, writes the file
+npm run planner import <file>   # or: save a plan downloaded from the page
 ```
 
 Then commit `planner/data/plans/` and push. Do not hand-edit a plan's
-`revision` — the planner uses it to detect that the other cook published first.
+`revision` — both the page and the server use it to detect that the other cook
+saved first. Never put an API key in `sync.json` or anywhere else the page can
+reach: it is built into a public site, and the Supabase project it talks to has
+other tables that `anon` can read and write.

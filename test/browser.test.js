@@ -120,6 +120,32 @@ test('an exported card works offline in a real browser', async (t) => {
       assert.equal(await page.isChecked('#step-1-check'), false);
     });
 
+    await t.test('the theme follows you from the index onto a card', async () => {
+      // The point of sharing the key: picking dark on the index and opening a
+      // recipe must not throw you back into light. Before this was shared, the
+      // cards kept theme per recipe and the index had no toggle at all.
+      const indexUrl = pathToFileURL(path.join(outDir, 'index.html')).href;
+      const other = await browser.newPage();
+      await other.goto(indexUrl);
+
+      assert.equal(await other.getAttribute('html', 'data-theme'), null, 'starts on auto');
+      await other.click('#theme-toggle');
+      assert.equal(await other.getAttribute('html', 'data-theme'), 'light');
+      await other.click('#theme-toggle');
+      assert.equal(await other.getAttribute('html', 'data-theme'), 'dark',
+        'the index cycles in the same order as a card');
+
+      await other.goto(url);
+      assert.equal(await other.getAttribute('html', 'data-theme'), 'dark',
+        'the card opens in the theme chosen on the index');
+      assert.equal(await other.textContent('#theme-toggle'), '☾',
+        'and its button shows that theme');
+
+      await other.goto(indexUrl);
+      assert.equal(await other.getAttribute('html', 'data-theme'), 'dark', 'and back again');
+      await other.close();
+    });
+
     await t.test('print hides the controls and nothing loads from the network', async () => {
       await page.emulateMedia({ media: 'print' });
       assert.equal(await page.locator('.toolbar-actions').isVisible(), false);

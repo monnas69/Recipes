@@ -22,7 +22,8 @@
 
   var DRAFT_PREFIX = 'meal-planner:draft:';
   var TICKS_PREFIX = 'meal-planner:ticked:';
-  var THEME_KEY = 'meal-planner:theme';
+  /** Where the planner kept its theme before it became site-wide. */
+  var LEGACY_THEME_KEY = 'meal-planner:theme';
 
   var recipes = data.recipes || [];
   var published = data.plans || {};
@@ -741,14 +742,6 @@
     state.toastTimer = setTimeout(function () { el.toast.hidden = true; }, 3200);
   }
 
-  /* ---------------- theme ---------------- */
-
-  function applyTheme(theme) {
-    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
-    else document.documentElement.removeAttribute('data-theme');
-    writeStore(THEME_KEY, theme);
-  }
-
   /* ---------------- wiring ---------------- */
 
   function bind() {
@@ -825,11 +818,6 @@
       if (state.syncState === 'conflict') setSyncState('saving');
       render();
       schedulePush();
-    });
-
-    document.getElementById('theme-toggle').addEventListener('click', function () {
-      var current = document.documentElement.getAttribute('data-theme');
-      applyTheme(current === 'dark' ? 'light' : current === 'light' ? 'auto' : 'dark');
     });
 
     el.days.addEventListener('click', function (event) {
@@ -935,7 +923,10 @@
     // The save bar carries the "unsaved" state instead.
   }
 
-  applyTheme(readStore(THEME_KEY) || 'auto');
+  // Site-wide theme (see src/shared/theme.js), falling back to whatever this
+  // page stored on its own before that. initTheme wires the button too, so the
+  // planner and the recipe cards now cycle in the same order.
+  initTheme(readStore(LEGACY_THEME_KEY) || 'auto');
   bind();
   loadWeek(data.week);
   startPolling();

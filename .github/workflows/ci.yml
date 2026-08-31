@@ -27,7 +27,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ['20', '22']
+        # 18 is the floor package.json claims, so it is tested rather than
+        # asserted; 24 is where the runners themselves are heading.
+        node: ['18', '20', '22', '24']
     steps:
       - uses: actions/checkout@v4
 
@@ -87,7 +89,10 @@ jobs:
         run: |
           set -o pipefail
           npm test 2>&1 | tee /tmp/out.txt
-          if grep -qE '^# skipped [1-9]' /tmp/out.txt; then
+          # Node <=22 prints "# skipped N"; Node 24 prints "ℹ skipped N". Match
+          # both, or this guard quietly stops guarding on a newer runtime —
+          # which is the exact failure it exists to catch.
+          if grep -qE '^(#|ℹ)[[:space:]]+skipped[[:space:]]+[1-9]' /tmp/out.txt; then
             echo "::error::Browser tests skipped instead of running."
             grep -E 'skip' /tmp/out.txt | head -20
             exit 1

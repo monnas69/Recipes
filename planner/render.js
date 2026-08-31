@@ -159,6 +159,7 @@ ${PLANNER_CSS}
         <label class="sr-only" for="recipe-search">Filter recipes</label>
         <input type="search" id="recipe-search" placeholder="Filter recipes…">
         <ul class="recipe-list" id="recipe-list"></ul>
+        <button type="button" class="freeform-add" id="freeform-add" hidden></button>
         <p class="picker-hint" id="picker-hint"></p>
       </aside>
     </div>
@@ -167,6 +168,7 @@ ${PLANNER_CSS}
       <h2 class="panel-title">Shopping list <span class="count" id="shopping-count"></span></h2>
       <p class="shopping-empty" id="shopping-empty">Assign a recipe to a day and the list builds itself.</p>
       <ul class="shopping-list" id="shopping-list"></ul>
+      <div class="shopping-freeform" id="shopping-freeform" hidden></div>
       <div class="shopping-actions no-print" id="shopping-actions" hidden>
         <button type="button" id="copy-shopping">Copy list</button>
         <button type="button" id="print-shopping">Print</button>

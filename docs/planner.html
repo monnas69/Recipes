@@ -610,6 +610,24 @@ ul.list { list-style: none; margin: 0; padding: 0; }
   border-radius: 6px;
 }
 
+/* A free-text meal: a name, and nothing the shopping list can use. The input
+   reads as plain text until you reach for it. */
+.assignment.freeform { background: transparent; border-style: dashed; }
+.freeform-input {
+  width: 100%;
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 600;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 1px 4px;
+  margin: -1px -4px;
+}
+.freeform-input:hover { border-color: var(--border); }
+.freeform-input:focus { border-color: var(--accent); background: var(--surface); outline: none; }
+
 .icon-button {
   width: 24px;
   height: 24px;
@@ -665,6 +683,19 @@ ul.list { list-style: none; margin: 0; padding: 0; }
 .recipe-option span { display: block; color: var(--muted); font-size: 11.5px; }
 .recipe-list li:last-child .recipe-option { border-bottom: 0; }
 
+.freeform-add {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--muted);
+  border-style: dashed;
+}
+.freeform-add:hover { color: var(--accent); border-color: var(--accent); }
+.freeform-add[hidden] { display: none; }
+
 .picker-hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
 .picker.arming .recipe-list { border-color: var(--accent); }
 
@@ -704,6 +735,20 @@ ul.list { list-style: none; margin: 0; padding: 0; }
   margin-left: 5px;
 }
 
+.shopping-freeform {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+.shopping-freeform[hidden] { display: none; }
+.shopping-freeform strong { display: block; color: var(--muted); font-size: 11.5px;
+  text-transform: uppercase; letter-spacing: .05em; }
+.shopping-freeform ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.shopping-freeform li { padding: 2px 0; }
+.shopping-freeform .from { color: var(--muted); font-size: 11.5px; margin-left: 8px; }
+
 .shopping-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 .shopping-empty { color: var(--muted); padding: 10px 0; }
 
@@ -725,6 +770,8 @@ ul.list { list-style: none; margin: 0; padding: 0; }
 @media print {
   .week-bar, .save-bar, .banner, .picker, .planner-grid > aside,
   .shopping-actions, .day-head .day-add, .assignment .icon-button { display: none !important; }
+  /* A printed week shows names, not form fields. */
+  .freeform-input { border-color: transparent !important; padding: 0; margin: 0; -webkit-appearance: none; appearance: none; }
   .planner { border: 0; box-shadow: none; }
   .planner-grid { grid-template-columns: minmax(0, 1fr); }
   .shopping { break-before: page; }
@@ -749,8 +796,8 @@ ul.list { list-style: none; margin: 0; padding: 0; }
       <button type="button" class="round" id="next-week" aria-label="Next week">›</button>
     </div>
     <div class="week-title">
-      <strong id="week-name">2026-W35</strong>
-      <span id="week-range">24 Aug – 30 Aug 2026</span>
+      <strong id="week-name">2026-W36</strong>
+      <span id="week-range">31 Aug – 6 Sep 2026</span>
     </div>
     <span class="chip-today" id="today-chip" hidden>This week</span>
     <span class="spacer"></span>
@@ -796,6 +843,7 @@ ul.list { list-style: none; margin: 0; padding: 0; }
         <label class="sr-only" for="recipe-search">Filter recipes</label>
         <input type="search" id="recipe-search" placeholder="Filter recipes…">
         <ul class="recipe-list" id="recipe-list"></ul>
+        <button type="button" class="freeform-add" id="freeform-add" hidden></button>
         <p class="picker-hint" id="picker-hint"></p>
       </aside>
     </div>
@@ -804,6 +852,7 @@ ul.list { list-style: none; margin: 0; padding: 0; }
       <h2 class="panel-title">Shopping list <span class="count" id="shopping-count"></span></h2>
       <p class="shopping-empty" id="shopping-empty">Assign a recipe to a day and the list builds itself.</p>
       <ul class="shopping-list" id="shopping-list"></ul>
+      <div class="shopping-freeform" id="shopping-freeform" hidden></div>
       <div class="shopping-actions no-print" id="shopping-actions" hidden>
         <button type="button" id="copy-shopping">Copy list</button>
         <button type="button" id="print-shopping">Print</button>
@@ -813,14 +862,14 @@ ul.list { list-style: none; margin: 0; padding: 0; }
   </div>
 
   <footer class="card-footer">
-    <span>Rebuilt 2026-08-30 with ninja-recipe-card-exporter</span>
+    <span>Rebuilt 2026-08-31 with ninja-recipe-card-exporter</span>
     <span>Plans live in planner/data/plans/</span>
   </footer>
 </main>
 
 <p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
 
-<script type="application/json" id="planner-json">{"week":"2026-W35","recipes":[{"slug":"cold-smoked-hickory-beef-jerky","title":"Cold Smoked Hickory Beef Jerky","description":"Cold smoked with real hickory on the Weber Q Smokai, then finished low and slow in the Ninja OL650 — the best of both worlds.","base_servings":8,"servings_unit":"servings","ingredients":[{"name":"topside beef","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"trimmed of all fat","scalable":true},{"name":"Worcestershire sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"soy sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"dark brown sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","scalable":true},{"name":"smoked paprika","amount":2,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"garlic powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"onion powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"black pepper","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"cayenne pepper","amount":0.25,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"salt","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"hickory wood chips","amount":1,"amount_max":null,"amount_text":"","unit":"cups","note":"","scalable":true}],"meta":{"total_time":"About 20 hr, nearly all of it waiting","cook_time":"6–9 hr","difficulty":"Intermediate"}},{"slug":"homemade-pastrami-without-a-smoker","title":"Homemade Pastrami Without a Smoker","description":"Corned beef rolled in a coarse pepper-and-coriander spice mix, slow cooked until tender, chilled, then baked to set the crust. No smoker required.","base_servings":6,"servings_unit":"servings","ingredients":[{"name":"corned beef","amount":2,"amount_max":null,"amount_text":"","unit":"kg","note":"with a thick fat cap","scalable":true},{"name":"black pepper","amount":4,"amount_max":null,"amount_text":"","unit":"tbsp","note":"fresh, coarsely ground","scalable":true},{"name":"coriander powder","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"mustard powder","amount":1.5,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"brown sugar","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"smoked paprika","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"garlic powder","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"onion powder","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"liquid smoke","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"optional","scalable":true}],"meta":{"total_time":"11 hr 20 min","cook_time":"11 hr","difficulty":""}},{"slug":"hot-smoked-hickory-beef-jerky","title":"Hot Smoked Hickory Beef Jerky","description":"Smoked start to finish on the Weber Q with the Smokai running continuous hickory. The burners hold 70–80°C at grate level, so the strips cook as they smoke — no dehydrator, no second appliance.","base_servings":8,"servings_unit":"servings","ingredients":[{"name":"topside beef","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"trimmed of all fat","scalable":true},{"name":"Worcestershire sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"soy sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"dark brown sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","scalable":true},{"name":"smoked paprika","amount":2,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"garlic powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"onion powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"black pepper","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"cayenne pepper","amount":0.25,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"salt","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"hickory chips or sawdust","amount":2,"amount_max":null,"amount_text":"","unit":"cups","note":"for the Smokai, topped up as it burns through","scalable":true}],"meta":{"total_time":"About 18 hr, mostly marinating","cook_time":"4–6 hr","difficulty":"Intermediate"}},{"slug":"italian-sausage-hot","title":"Italian Sausage — Hot","description":"Bulk sausage mix, hot version. Mix everything into the mince, then run it through the sausage making machine.","base_servings":10,"servings_unit":"kg batch","ingredients":[{"name":"mince","amount":10,"amount_max":null,"amount_text":"","unit":"kg","note":"","scalable":true},{"name":"salt","amount":250,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"paprika","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"fennel","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"fine pepper","amount":41,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"hot chilli","amount":33,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"sweet chilli","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"dry red wine","amount":325,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"","difficulty":"Easy"}},{"slug":"italian-sausage-normal","title":"Italian Sausage — Normal","description":"Bulk sausage mix, normal (non-hot) version. Mix everything into the mince, then run it through the sausage making machine.","base_servings":10,"servings_unit":"kg batch","ingredients":[{"name":"mince","amount":10,"amount_max":null,"amount_text":"","unit":"kg","note":"","scalable":true},{"name":"salt","amount":300,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"paprika","amount":200,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"fennel","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"pepper","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"bell pepper","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"red","scalable":true},{"name":"garlic granules","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"dry red wine","amount":325,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"","difficulty":"Easy"}},{"slug":"lemon-garlic-butter-shrimp","title":"Lemon Garlic Butter Shrimp","description":"One pan, fifteen minutes. The sauce is just butter, garlic and lemon, emulsified with a splash of the pasta water or stock.","base_servings":2,"servings_unit":"servings","ingredients":[{"name":"large shrimp","amount":450,"amount_max":null,"amount_text":"","unit":"g","note":"peeled and deveined","scalable":true},{"name":"unsalted butter","amount":3,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"olive oil","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"garlic","amount":4,"amount_max":null,"amount_text":"","unit":"cloves","note":"thinly sliced","scalable":true},{"name":"chilli flakes","amount":0.25,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"lemon","amount":1,"amount_max":null,"amount_text":"","unit":"","note":"juice and zest","scalable":true},{"name":"flat-leaf parsley","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"chopped","scalable":true},{"name":"salt and pepper","amount":null,"amount_max":null,"amount_text":"to taste","unit":"","note":"","scalable":false}],"meta":{"total_time":"","cook_time":"10 min","difficulty":"Easy"}},{"slug":"ninja-ol650-chicken-wings","title":"Ninja OL650 Chicken Wings","description":"Marinated wings air fried to crispy perfection — confirmed and tested.","base_servings":4,"servings_unit":"servings","ingredients":[{"name":"chicken wings","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"marinated","scalable":true}],"meta":{"total_time":"","cook_time":"24 min","difficulty":"Easy"}},{"slug":"ninja-ol650-panko-crumbed-fish-fillets","title":"Ninja OL650 Panko Crumbed Fish Fillets","description":"Crispy panko crumbed fish fillets air fried on the Reversible Rack — confirmed and tested.","base_servings":4,"servings_unit":"servings","ingredients":[{"name":"fish fillets","amount":4,"amount_max":null,"amount_text":"","unit":"fillets","note":"2–2.5cm thick, cod or salmon","scalable":true},{"name":"plain flour","amount":4,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","scalable":true},{"name":"eggs","amount":2,"amount_max":null,"amount_text":"","unit":"","note":"beaten","scalable":true},{"name":"panko breadcrumbs","amount":1,"amount_max":null,"amount_text":"","unit":"cup","note":"","scalable":true},{"name":"oil spray","amount":1,"amount_max":null,"amount_text":"","unit":"spray","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"12 min","difficulty":"Easy"}},{"slug":"ninja-ol650-smoky-beef-jerky","title":"Ninja OL650 Smoky Beef Jerky","description":"Topside beef with a smoky, savoury Worcestershire marinade — dehydrated low and slow in the OL650. No smoker involved: liquid smoke does the work.","base_servings":8,"servings_unit":"servings","ingredients":[{"name":"topside beef","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"trimmed of all fat","scalable":true},{"name":"Worcestershire sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"soy sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"liquid smoke","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"dark brown sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"smoked paprika","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"garlic powder","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"onion powder","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"black pepper","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"cayenne pepper","amount":0.25,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"salt","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"5–7 hr","difficulty":"Easy"}},{"slug":"ninja-ol650-white-rice-long-grain","title":"Ninja OL650 White Rice (Long Grain)","description":"Pressure-cooked long grain white rice — confirmed and tested.","base_servings":4,"servings_unit":"servings","ingredients":[{"name":"long grain white rice","amount":200,"amount_max":null,"amount_text":"","unit":"g","note":"rinsed","scalable":true},{"name":"water","amount":250,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"17 min","difficulty":"Easy"}},{"slug":"pad-see-ew-thai-stir-fried-noodles","title":"Pad See Ew - Thai Stir Fried Noodles","description":"Wide rice noodles stir-fried with chicken, egg and Chinese broccoli in a dark, smoky soy sauce. One of the most popular Thai street foods.","base_servings":2,"servings_unit":"servings","ingredients":[{"name":"dried wide rice stick noodles","amount":200,"amount_max":null,"amount_text":"","unit":"g","note":"or 450g fresh wide flat rice noodles (Sen Yai) if you can get them","scalable":true},{"name":"dark soy sauce","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"oyster sauce","amount":1.5,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"light soy sauce","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"or all-purpose soy sauce","scalable":true},{"name":"white vinegar","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"peanut or vegetable oil","amount":3,"amount_max":null,"amount_text":"","unit":"tbsp","note":"divided","scalable":true},{"name":"garlic","amount":2,"amount_max":null,"amount_text":"","unit":"cloves","note":"very finely chopped","scalable":true},{"name":"chicken thighs","amount":150,"amount_max":null,"amount_text":"","unit":"g","note":"boneless, skinless, sliced","scalable":true},{"name":"egg","amount":1,"amount_max":null,"amount_text":"","unit":"","note":"large","scalable":true},{"name":"Chinese broccoli","amount":4,"amount_max":null,"amount_text":"","unit":"stems","note":"","scalable":true}],"meta":{"total_time":"18 min","cook_time":"10 min","difficulty":""}}],"plans":{"2026-W35":{"week":"2026-W35","revision":0,"updated_at":null,"updated_by":"","days":{"2026-08-24":[],"2026-08-25":[],"2026-08-26":[],"2026-08-27":[],"2026-08-28":[],"2026-08-29":[],"2026-08-30":[]}}},"plansDir":"planner/data/plans","generatedAt":"2026-08-30T01:48:21.429Z"}</script>
+<script type="application/json" id="planner-json">{"week":"2026-W36","recipes":[{"slug":"cold-smoked-hickory-beef-jerky","title":"Cold Smoked Hickory Beef Jerky","description":"Cold smoked with real hickory on the Weber Q Smokai, then finished low and slow in the Ninja OL650 — the best of both worlds.","base_servings":8,"servings_unit":"servings","ingredients":[{"name":"topside beef","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"trimmed of all fat","scalable":true},{"name":"Worcestershire sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"soy sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"dark brown sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","scalable":true},{"name":"smoked paprika","amount":2,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"garlic powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"onion powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"black pepper","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"cayenne pepper","amount":0.25,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"salt","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"hickory wood chips","amount":1,"amount_max":null,"amount_text":"","unit":"cups","note":"","scalable":true}],"meta":{"total_time":"About 20 hr, nearly all of it waiting","cook_time":"6–9 hr","difficulty":"Intermediate"}},{"slug":"homemade-pastrami-without-a-smoker","title":"Homemade Pastrami Without a Smoker","description":"Corned beef rolled in a coarse pepper-and-coriander spice mix, slow cooked until tender, chilled, then baked to set the crust. No smoker required.","base_servings":6,"servings_unit":"servings","ingredients":[{"name":"corned beef","amount":2,"amount_max":null,"amount_text":"","unit":"kg","note":"with a thick fat cap","scalable":true},{"name":"black pepper","amount":4,"amount_max":null,"amount_text":"","unit":"tbsp","note":"fresh, coarsely ground","scalable":true},{"name":"coriander powder","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"mustard powder","amount":1.5,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"brown sugar","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"smoked paprika","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"garlic powder","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"onion powder","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"liquid smoke","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"optional","scalable":true}],"meta":{"total_time":"11 hr 20 min","cook_time":"11 hr","difficulty":""}},{"slug":"hot-smoked-hickory-beef-jerky","title":"Hot Smoked Hickory Beef Jerky","description":"Smoked start to finish on the Weber Q with the Smokai running continuous hickory. The burners hold 70–80°C at grate level, so the strips cook as they smoke — no dehydrator, no second appliance.","base_servings":8,"servings_unit":"servings","ingredients":[{"name":"topside beef","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"trimmed of all fat","scalable":true},{"name":"Worcestershire sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"soy sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"dark brown sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","scalable":true},{"name":"smoked paprika","amount":2,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"garlic powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"onion powder","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"black pepper","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"cayenne pepper","amount":0.25,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"salt","amount":1,"amount_max":null,"amount_text":"","unit":"teaspoons","note":"","scalable":true},{"name":"hickory chips or sawdust","amount":2,"amount_max":null,"amount_text":"","unit":"cups","note":"for the Smokai, topped up as it burns through","scalable":true}],"meta":{"total_time":"About 18 hr, mostly marinating","cook_time":"4–6 hr","difficulty":"Intermediate"}},{"slug":"italian-sausage-hot","title":"Italian Sausage — Hot","description":"Bulk sausage mix, hot version. Mix everything into the mince, then run it through the sausage making machine.","base_servings":10,"servings_unit":"kg batch","ingredients":[{"name":"mince","amount":10,"amount_max":null,"amount_text":"","unit":"kg","note":"","scalable":true},{"name":"salt","amount":250,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"paprika","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"fennel","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"fine pepper","amount":41,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"hot chilli","amount":33,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"sweet chilli","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"dry red wine","amount":325,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"","difficulty":"Easy"}},{"slug":"italian-sausage-normal","title":"Italian Sausage — Normal","description":"Bulk sausage mix, normal (non-hot) version. Mix everything into the mince, then run it through the sausage making machine.","base_servings":10,"servings_unit":"kg batch","ingredients":[{"name":"mince","amount":10,"amount_max":null,"amount_text":"","unit":"kg","note":"","scalable":true},{"name":"salt","amount":300,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"paprika","amount":200,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"fennel","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"pepper","amount":50,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"bell pepper","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"red","scalable":true},{"name":"garlic granules","amount":25,"amount_max":null,"amount_text":"","unit":"grams","note":"","scalable":true},{"name":"dry red wine","amount":325,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"","difficulty":"Easy"}},{"slug":"lemon-garlic-butter-shrimp","title":"Lemon Garlic Butter Shrimp","description":"One pan, fifteen minutes. The sauce is just butter, garlic and lemon, emulsified with a splash of the pasta water or stock.","base_servings":2,"servings_unit":"servings","ingredients":[{"name":"large shrimp","amount":450,"amount_max":null,"amount_text":"","unit":"g","note":"peeled and deveined","scalable":true},{"name":"unsalted butter","amount":3,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"olive oil","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"garlic","amount":4,"amount_max":null,"amount_text":"","unit":"cloves","note":"thinly sliced","scalable":true},{"name":"chilli flakes","amount":0.25,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"lemon","amount":1,"amount_max":null,"amount_text":"","unit":"","note":"juice and zest","scalable":true},{"name":"flat-leaf parsley","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"chopped","scalable":true},{"name":"salt and pepper","amount":null,"amount_max":null,"amount_text":"to taste","unit":"","note":"","scalable":false}],"meta":{"total_time":"","cook_time":"10 min","difficulty":"Easy"}},{"slug":"ninja-ol650-chicken-wings","title":"Ninja OL650 Chicken Wings","description":"Marinated wings air fried to crispy perfection — confirmed and tested.","base_servings":4,"servings_unit":"servings","ingredients":[{"name":"chicken wings","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"marinated","scalable":true}],"meta":{"total_time":"","cook_time":"24 min","difficulty":"Easy"}},{"slug":"ninja-ol650-panko-crumbed-fish-fillets","title":"Ninja OL650 Panko Crumbed Fish Fillets","description":"Crispy panko crumbed fish fillets air fried on the Reversible Rack — confirmed and tested.","base_servings":4,"servings_unit":"servings","ingredients":[{"name":"fish fillets","amount":4,"amount_max":null,"amount_text":"","unit":"fillets","note":"2–2.5cm thick, cod or salmon","scalable":true},{"name":"plain flour","amount":4,"amount_max":null,"amount_text":"","unit":"tablespoons","note":"","scalable":true},{"name":"eggs","amount":2,"amount_max":null,"amount_text":"","unit":"","note":"beaten","scalable":true},{"name":"panko breadcrumbs","amount":1,"amount_max":null,"amount_text":"","unit":"cup","note":"","scalable":true},{"name":"oil spray","amount":1,"amount_max":null,"amount_text":"","unit":"spray","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"12 min","difficulty":"Easy"}},{"slug":"ninja-ol650-smoky-beef-jerky","title":"Ninja OL650 Smoky Beef Jerky","description":"Topside beef with a smoky, savoury Worcestershire marinade — dehydrated low and slow in the OL650. No smoker involved: liquid smoke does the work.","base_servings":8,"servings_unit":"servings","ingredients":[{"name":"topside beef","amount":1,"amount_max":null,"amount_text":"","unit":"kg","note":"trimmed of all fat","scalable":true},{"name":"Worcestershire sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"soy sauce","amount":60,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true},{"name":"liquid smoke","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"dark brown sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"smoked paprika","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"garlic powder","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"onion powder","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"black pepper","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"cayenne pepper","amount":0.25,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"salt","amount":1,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"5–7 hr","difficulty":"Easy"}},{"slug":"ninja-ol650-white-rice-long-grain","title":"Ninja OL650 White Rice (Long Grain)","description":"Pressure-cooked long grain white rice — confirmed and tested.","base_servings":4,"servings_unit":"servings","ingredients":[{"name":"long grain white rice","amount":200,"amount_max":null,"amount_text":"","unit":"g","note":"rinsed","scalable":true},{"name":"water","amount":250,"amount_max":null,"amount_text":"","unit":"ml","note":"","scalable":true}],"meta":{"total_time":"","cook_time":"17 min","difficulty":"Easy"}},{"slug":"pad-see-ew-thai-stir-fried-noodles","title":"Pad See Ew - Thai Stir Fried Noodles","description":"Wide rice noodles stir-fried with chicken, egg and Chinese broccoli in a dark, smoky soy sauce. One of the most popular Thai street foods.","base_servings":2,"servings_unit":"servings","ingredients":[{"name":"dried wide rice stick noodles","amount":200,"amount_max":null,"amount_text":"","unit":"g","note":"or 450g fresh wide flat rice noodles (Sen Yai) if you can get them","scalable":true},{"name":"dark soy sauce","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"oyster sauce","amount":1.5,"amount_max":null,"amount_text":"","unit":"tbsp","note":"","scalable":true},{"name":"light soy sauce","amount":1,"amount_max":null,"amount_text":"","unit":"tbsp","note":"or all-purpose soy sauce","scalable":true},{"name":"white vinegar","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"sugar","amount":2,"amount_max":null,"amount_text":"","unit":"tsp","note":"","scalable":true},{"name":"peanut or vegetable oil","amount":3,"amount_max":null,"amount_text":"","unit":"tbsp","note":"divided","scalable":true},{"name":"garlic","amount":2,"amount_max":null,"amount_text":"","unit":"cloves","note":"very finely chopped","scalable":true},{"name":"chicken thighs","amount":150,"amount_max":null,"amount_text":"","unit":"g","note":"boneless, skinless, sliced","scalable":true},{"name":"egg","amount":1,"amount_max":null,"amount_text":"","unit":"","note":"large","scalable":true},{"name":"Chinese broccoli","amount":4,"amount_max":null,"amount_text":"","unit":"stems","note":"","scalable":true}],"meta":{"total_time":"18 min","cook_time":"10 min","difficulty":""}}],"plans":{"2026-W36":{"week":"2026-W36","revision":0,"updated_at":null,"updated_by":"","days":{"2026-08-31":[],"2026-09-01":[],"2026-09-02":[],"2026-09-03":[],"2026-09-04":[],"2026-09-05":[],"2026-09-06":[]}}},"plansDir":"planner/data/plans","generatedAt":"2026-08-31T10:19:30.546Z"}</script>
 <script>
 try {
   window.PLANNER_DATA = JSON.parse(document.getElementById('planner-json').textContent);
@@ -1181,7 +1230,12 @@ function weekLabel(weekId) {
  *      rather than being dropped or silently added together.
  *   3. Amounts that never parsed ("to taste", "a pinch") are carried through as
  *      text, so nothing a recipe asked for disappears from the list.
+ *
+ * Free-text meals have no ingredients at all, so they never reach any of this.
+ * They are collected separately and named at the bottom of the list instead:
+ * knowing the list ignores a meal is what stops you coming home without it.
  */
+
 
 
 
@@ -1337,16 +1391,28 @@ function pushUnique(list, value, limit) {
 /**
  * Aggregate a week's assignments into a shopping list.
  *
- * @param {Array<{recipe: object, servings?: number, date?: string}>} assignments
- * @returns {{items: Array, recipeCount: number, itemCount: number, mergedCount: number}}
+ * @param {Array<{recipe?: object, text?: string, servings?: number, date?: string}>} assignments
+ * @returns {{items: Array, recipeCount: number, itemCount: number, mergedCount: number,
+ *            freeText: Array<{date: string|null, text: string, note: string}>}}
  */
 function buildShoppingList(assignments) {
   const groups = new Map();
+  const freeText = [];
   let recipeCount = 0;
 
   for (const assignment of assignments || []) {
     const recipe = assignment && assignment.recipe;
-    if (!recipe || !Array.isArray(recipe.ingredients)) continue;
+    if (!recipe || !Array.isArray(recipe.ingredients)) {
+      const text = clean(assignment && assignment.text);
+      if (text) {
+        freeText.push({
+          date: (assignment && assignment.date) || null,
+          text: text,
+          note: clean(assignment && assignment.note)
+        });
+      }
+      continue;
+    }
     recipeCount += 1;
 
     const base = Number(recipe.base_servings) || 1;
@@ -1456,7 +1522,13 @@ function buildShoppingList(assignments) {
   }
 
   items.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-  return { items: items, recipeCount: recipeCount, itemCount: items.length, mergedCount: mergedCount };
+  return {
+    items: items,
+    recipeCount: recipeCount,
+    itemCount: items.length,
+    mergedCount: mergedCount,
+    freeText: freeText
+  };
 }
 
 /**
@@ -1507,14 +1579,29 @@ function shoppingListToText(list, heading) {
     lines.push(heading);
     lines.push('');
   }
-  if (!list.items.length) {
+  const items = (list && list.items) || [];
+  const freeText = (list && list.freeText) || [];
+
+  if (!items.length && !freeText.length) {
     lines.push('Nothing planned yet.');
     return lines.join('\n');
   }
-  for (const item of list.items) {
+
+  for (const item of items) {
     const amounts = item.quantities.map((q) => q.text).filter(Boolean);
     for (const extra of item.extras) amounts.push(extra);
     lines.push('- ' + item.name + (amounts.length ? '  —  ' + amounts.join(' + ') : ''));
+  }
+
+  // This is the text that gets pasted into a phone and taken to the shops, so
+  // the meals the list could not account for belong in it.
+  if (freeText.length) {
+    if (items.length) lines.push('');
+    lines.push('Not on this list (no recipe):');
+    for (const meal of freeText) {
+      const when = meal.date ? '  —  ' + dayName(meal.date) + ' ' + dayLabel(meal.date) : '';
+      lines.push('- ' + meal.text + when);
+    }
   }
   return lines.join('\n');
 }
@@ -1537,6 +1624,9 @@ function shoppingListToText(list, heading) {
 
   var data = window.PLANNER_DATA;
   if (!data) return;
+
+  /** Matches MAX_TEXT_LENGTH in plan-store.js. */
+  var MAX_TEXT = 80;
 
   var DRAFT_PREFIX = 'meal-planner:draft:';
   var TICKS_PREFIX = 'meal-planner:ticked:';
@@ -1605,7 +1695,12 @@ function shoppingListToText(list, heading) {
     for (var d = 0; d < dates.length; d += 1) {
       var entries = plan.days[dates[d]] || [];
       for (var e = 0; e < entries.length; e += 1) {
-        out.push(dates[d] + '|' + entries[e].slug + '|' + (entries[e].servings || '') + '|' + (entries[e].note || ''));
+        // `text` is in here for a reason: without it every free-text meal on a
+        // day stringifies the same, so renaming one — or swapping it for a
+        // different one — would read as "no change", clear the draft and lose
+        // the edit on the next load.
+        out.push(dates[d] + '|' + (entries[e].slug || '') + '|' + (entries[e].text || '')
+          + '|' + (entries[e].servings || '') + '|' + (entries[e].note || ''));
       }
       out.push('/');
     }
@@ -1655,12 +1750,17 @@ function shoppingListToText(list, heading) {
       for (var e = 0; e < entries.length; e += 1) {
         var entry = entries[e];
         var slug = entry && typeof entry === 'object' ? entry.slug : entry;
-        if (!slug) continue;
+        var note = entry && entry.note ? String(entry.note) : '';
+        if (!slug) {
+          var text = entry && entry.text ? String(entry.text).trim().slice(0, MAX_TEXT) : '';
+          if (text) kept.push({ text: text, note: note });
+          continue;
+        }
         var servings = Number(entry && entry.servings);
         kept.push({
           slug: String(slug),
           servings: servings > 0 ? Math.round(servings) : null,
-          note: entry && entry.note ? String(entry.note) : ''
+          note: note
         });
       }
       plan.days[dates[d]] = kept;
@@ -1691,6 +1791,16 @@ function shoppingListToText(list, heading) {
     toast(recipe.title + ' → ' + dayName(date));
   }
 
+  /** A meal that is just a name — no recipe, nothing for the shopping list. */
+  function assignText(date, text) {
+    var name = String(text == null ? '' : text).trim().slice(0, MAX_TEXT);
+    if (!name || !state.plan.days[date]) return;
+    state.plan.days[date].push({ text: name, note: '' });
+    state.target = date;
+    changed();
+    toast(name + ' → ' + dayName(date));
+  }
+
   function unassign(date, index) {
     var entries = state.plan.days[date];
     if (!entries || !entries[index]) return;
@@ -1714,6 +1824,17 @@ function shoppingListToText(list, heading) {
     if (!entries || !entries[index]) return;
     var number = Number(value);
     entries[index].servings = number > 0 ? Math.round(number) : null;
+    changed();
+  }
+
+  /** Rename a free-text meal in place; clearing the name removes it. */
+  function setText(date, index, value) {
+    var entries = state.plan.days[date];
+    if (!entries || !entries[index] || entries[index].slug) return;
+    var name = String(value == null ? '' : value).trim().slice(0, MAX_TEXT);
+    if (name === entries[index].text) return;
+    if (name) entries[index].text = name;
+    else entries.splice(index, 1);
     changed();
   }
 
@@ -1785,7 +1906,37 @@ function shoppingListToText(list, heading) {
     el.days.innerHTML = html;
   }
 
+  /** The reorder/remove buttons, identical for both kinds of meal. */
+  function assignmentControls(date, index, total, label) {
+    return (total > 1
+      ? '<button type="button" class="icon-button no-print" data-move="-1" data-date="' + date
+        + '" data-index="' + index + '" aria-label="Move ' + escapeHtml(label) + ' earlier"'
+        + (index === 0 ? ' disabled' : '') + '>↑</button>'
+      : '')
+      + '<button type="button" class="icon-button no-print" data-remove="' + index + '" data-date="' + date
+      + '" aria-label="Remove ' + escapeHtml(label) + '">×</button>';
+  }
+
+  /**
+   * A free-text meal. The name is an input that reads as plain text until it is
+   * hovered or focused, so a typo is fixed by clicking it rather than by
+   * deleting the row and typing it again.
+   */
+  function renderFreeformAssignment(date, entry, index, total) {
+    var name = entry.text || '';
+    return '<li class="assignment freeform" data-date="' + date + '" data-index="' + index + '">'
+      + '<div class="assignment-main">'
+      + '<input class="freeform-input" type="text" value="' + escapeHtml(name) + '"'
+      + ' maxlength="' + MAX_TEXT + '" data-text="' + index + '" data-date="' + date + '"'
+      + ' aria-label="Meal on ' + escapeHtml(dayName(date) + ' ' + dayLabel(date)) + '">'
+      + '<span class="assignment-meta">not in the shopping list</span></div>'
+      + assignmentControls(date, index, total, name)
+      + '</li>';
+  }
+
   function renderAssignment(date, entry, index, total) {
+    if (!entry.slug) return renderFreeformAssignment(date, entry, index, total);
+
     var recipe = recipesBySlug[entry.slug];
     var title = recipe ? recipe.title : entry.slug;
     var servings = entry.servings || (recipe ? recipe.base_servings : null);
@@ -1805,13 +1956,7 @@ function shoppingListToText(list, heading) {
           + escapeHtml(servings) + '" data-servings="' + index + '" data-date="' + date + '"'
           + ' aria-label="Servings of ' + escapeHtml(title) + '">'
         : '')
-      + (total > 1
-        ? '<button type="button" class="icon-button no-print" data-move="-1" data-date="' + date
-          + '" data-index="' + index + '" aria-label="Move ' + escapeHtml(title) + ' earlier"'
-          + (index === 0 ? ' disabled' : '') + '>↑</button>'
-        : '')
-      + '<button type="button" class="icon-button no-print" data-remove="' + index + '" data-date="' + date
-      + '" aria-label="Remove ' + escapeHtml(title) + '">×</button>'
+      + assignmentControls(date, index, total, title)
       + '</li>';
   }
 
@@ -1837,8 +1982,45 @@ function shoppingListToText(list, heading) {
 
     var target = state.target || defaultTarget();
     el.pickerHint.textContent = recipes.length
-      ? 'Click a recipe to add it to ' + dayName(target) + ' ' + dayLabel(target) + ', or drag it onto any day.'
+      ? 'Click a recipe to add it to ' + dayName(target) + ' ' + dayLabel(target)
+        + ', or drag it onto any day. Anything else you type can go on as a plain name.'
       : 'Add recipe sources to recipes/ and rebuild.';
+    renderFreeformAdd();
+  }
+
+  /**
+   * When the filter box has text in it, offer it as a meal. Typing the name of
+   * something and finding nothing is exactly the moment a free-text meal is
+   * wanted, so the search box doubles as the entry field — no second control.
+   */
+  function renderFreeformAdd() {
+    var query = el.search ? el.search.value.trim() : '';
+    if (!query) {
+      el.freeformAdd.hidden = true;
+      el.freeformAdd.textContent = '';
+      return;
+    }
+    var target = state.target || defaultTarget();
+    el.freeformAdd.hidden = false;
+    el.freeformAdd.textContent = '+ Add \u201c' + query + '\u201d to ' + dayName(target) + ' ' + dayLabel(target);
+  }
+
+  function filterRecipes() {
+    var query = el.search.value.trim().toLowerCase();
+    var rows = el.recipeList.querySelectorAll('li[data-search]');
+    for (var r = 0; r < rows.length; r += 1) {
+      rows[r].hidden = query !== '' && rows[r].getAttribute('data-search').indexOf(query) === -1;
+    }
+  }
+
+  /** Clear the box before assigning, so the re-render hides the add row. */
+  function addFromSearch() {
+    var query = el.search.value.trim();
+    if (!query) return;
+    var target = state.target || defaultTarget();
+    el.search.value = '';
+    filterRecipes();
+    assignText(target, query);
   }
 
   function defaultTarget() {
@@ -1853,6 +2035,16 @@ function shoppingListToText(list, heading) {
     for (var d = 0; d < dates.length; d += 1) {
       var entries = state.plan.days[dates[d]] || [];
       for (var e = 0; e < entries.length; e += 1) {
+        if (!entries[e].slug) {
+          out.push({
+            recipe: null,
+            text: entries[e].text,
+            note: entries[e].note,
+            servings: null,
+            date: dates[d]
+          });
+          continue;
+        }
         var recipe = recipesBySlug[entries[e].slug];
         if (!recipe) continue;
         out.push({
@@ -1865,17 +2057,46 @@ function shoppingListToText(list, heading) {
     return out;
   }
 
+  /** Name the meals the list could not account for, rather than leaving a gap. */
+  function renderFreeformNote(freeText) {
+    if (!freeText.length) {
+      el.freeformNote.hidden = true;
+      el.freeformNote.innerHTML = '';
+      return;
+    }
+    var rows = '';
+    for (var i = 0; i < freeText.length; i += 1) {
+      var meal = freeText[i];
+      var when = meal.date ? dayName(meal.date) + ' ' + dayLabel(meal.date) : '';
+      rows += '<li>' + escapeHtml(meal.text)
+        + (when ? '<span class="from">' + escapeHtml(when) + '</span>' : '')
+        + '</li>';
+    }
+    el.freeformNote.innerHTML = '<strong>Not on this list (no recipe)</strong><ul>' + rows + '</ul>';
+    el.freeformNote.hidden = false;
+  }
+
   function renderShopping() {
     var assignments = currentAssignments();
     var list = buildShoppingList(assignments);
-    el.shoppingCount.textContent = list.itemCount
+    var freeText = list.freeText || [];
+
+    var count = list.itemCount
       ? list.itemCount + ' item' + (list.itemCount === 1 ? '' : 's') + ' from ' + list.recipeCount
         + ' meal' + (list.recipeCount === 1 ? '' : 's')
       : '';
+    if (freeText.length) {
+      count += (count ? ' · ' : '') + freeText.length + ' without recipe' + (freeText.length === 1 ? '' : 's');
+    }
+    el.shoppingCount.textContent = count;
+    renderFreeformNote(freeText);
 
     if (!list.items.length) {
       el.shoppingList.innerHTML = '';
       el.shoppingEmpty.hidden = false;
+      el.shoppingEmpty.textContent = freeText.length
+        ? 'Nothing to buy — every meal planned this week is a plain name.'
+        : 'Assign a recipe to a day and the list builds itself.';
       el.shoppingActions.hidden = true;
       return;
     }
@@ -2001,6 +2222,8 @@ function shoppingListToText(list, heading) {
     el.shoppingCount = document.getElementById('shopping-count');
     el.shoppingEmpty = document.getElementById('shopping-empty');
     el.shoppingActions = document.getElementById('shopping-actions');
+    el.freeformAdd = document.getElementById('freeform-add');
+    el.freeformNote = document.getElementById('shopping-freeform');
     el.saveBar = document.getElementById('save-bar');
     el.saveText = document.getElementById('save-text');
     el.discardButton = document.getElementById('discard-button');
@@ -2074,8 +2297,13 @@ function shoppingListToText(list, heading) {
     });
 
     el.days.addEventListener('change', function (event) {
-      var input = event.target.closest('[data-servings]');
-      if (input) setServings(input.getAttribute('data-date'), Number(input.getAttribute('data-servings')), input.value);
+      var servings = event.target.closest('[data-servings]');
+      if (servings) {
+        setServings(servings.getAttribute('data-date'), Number(servings.getAttribute('data-servings')), servings.value);
+        return;
+      }
+      var text = event.target.closest('[data-text]');
+      if (text) setText(text.getAttribute('data-date'), Number(text.getAttribute('data-text')), text.value);
     });
 
     el.recipeList.addEventListener('click', function (event) {
@@ -2110,12 +2338,19 @@ function shoppingListToText(list, heading) {
     });
 
     el.search.addEventListener('input', function () {
-      var query = el.search.value.trim().toLowerCase();
-      var rows = el.recipeList.querySelectorAll('li[data-search]');
-      for (var r = 0; r < rows.length; r += 1) {
-        rows[r].hidden = query !== '' && rows[r].getAttribute('data-search').indexOf(query) === -1;
-      }
+      filterRecipes();
+      renderFreeformAdd();
     });
+
+    // Type a name, press return: the whole interaction, without reaching for
+    // the mouse or leaving the box.
+    el.search.addEventListener('keydown', function (event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      addFromSearch();
+    });
+
+    el.freeformAdd.addEventListener('click', addFromSearch);
 
     el.shoppingList.addEventListener('change', function (event) {
       var box = event.target.closest('[data-tick]');

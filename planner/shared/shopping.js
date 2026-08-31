@@ -19,9 +19,14 @@
  *      rather than being dropped or silently added together.
  *   3. Amounts that never parsed ("to taste", "a pinch") are carried through as
  *      text, so nothing a recipe asked for disappears from the list.
+ *
+ * Free-text meals have no ingredients at all, so they never reach any of this.
+ * They are collected separately and named at the bottom of the list instead:
+ * knowing the list ignores a meal is what stops you coming home without it.
  */
 
 import { scaledAmountWithUnit } from '../../src/shared/format.js';
+import { dayLabel, dayName } from './week.js';
 
 /** Unit spellings -> a canonical unit, per measurement family. */
 const MASS_UNITS = {
@@ -175,16 +180,28 @@ function pushUnique(list, value, limit) {
 /**
  * Aggregate a week's assignments into a shopping list.
  *
- * @param {Array<{recipe: object, servings?: number, date?: string}>} assignments
- * @returns {{items: Array, recipeCount: number, itemCount: number, mergedCount: number}}
+ * @param {Array<{recipe?: object, text?: string, servings?: number, date?: string}>} assignments
+ * @returns {{items: Array, recipeCount: number, itemCount: number, mergedCount: number,
+ *            freeText: Array<{date: string|null, text: string, note: string}>}}
  */
 export function buildShoppingList(assignments) {
   const groups = new Map();
+  const freeText = [];
   let recipeCount = 0;
 
   for (const assignment of assignments || []) {
     const recipe = assignment && assignment.recipe;
-    if (!recipe || !Array.isArray(recipe.ingredients)) continue;
+    if (!recipe || !Array.isArray(recipe.ingredients)) {
+      const text = clean(assignment && assignment.text);
+      if (text) {
+        freeText.push({
+          date: (assignment && assignment.date) || null,
+          text: text,
+          note: clean(assignment && assignment.note)
+        });
+      }
+      continue;
+    }
     recipeCount += 1;
 
     const base = Number(recipe.base_servings) || 1;
@@ -294,7 +311,13 @@ export function buildShoppingList(assignments) {
   }
 
   items.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-  return { items: items, recipeCount: recipeCount, itemCount: items.length, mergedCount: mergedCount };
+  return {
+    items: items,
+    recipeCount: recipeCount,
+    itemCount: items.length,
+    mergedCount: mergedCount,
+    freeText: freeText
+  };
 }
 
 /**
@@ -345,14 +368,29 @@ export function shoppingListToText(list, heading) {
     lines.push(heading);
     lines.push('');
   }
-  if (!list.items.length) {
+  const items = (list && list.items) || [];
+  const freeText = (list && list.freeText) || [];
+
+  if (!items.length && !freeText.length) {
     lines.push('Nothing planned yet.');
     return lines.join('\n');
   }
-  for (const item of list.items) {
+
+  for (const item of items) {
     const amounts = item.quantities.map((q) => q.text).filter(Boolean);
     for (const extra of item.extras) amounts.push(extra);
     lines.push('- ' + item.name + (amounts.length ? '  —  ' + amounts.join(' + ') : ''));
+  }
+
+  // This is the text that gets pasted into a phone and taken to the shops, so
+  // the meals the list could not account for belong in it.
+  if (freeText.length) {
+    if (items.length) lines.push('');
+    lines.push('Not on this list (no recipe):');
+    for (const meal of freeText) {
+      const when = meal.date ? '  —  ' + dayName(meal.date) + ' ' + dayLabel(meal.date) : '';
+      lines.push('- ' + meal.text + when);
+    }
   }
   return lines.join('\n');
 }

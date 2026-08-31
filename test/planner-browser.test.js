@@ -39,7 +39,11 @@ test('the planner plans a week and builds a shopping list in a real browser', as
   const outDir = await mkdtemp(path.join(tmpdir(), 'meal-planner-browser-'));
   const plansDir = await mkdtemp(path.join(tmpdir(), 'meal-planner-browser-plans-'));
   await writePlan(plansDir, normalizePlan({
-    week: WEEK, days: { [MONDAY]: [{ slug: 'lemon-garlic-butter-shrimp', servings: 4 }] }
+    week: WEEK,
+    days: {
+      [MONDAY]: [{ slug: 'lemon-garlic-butter-shrimp', servings: 4 }],
+      '2026-09-06': [{ text: 'Leftovers' }]
+    }
   }, WEEK), { updatedBy: 'shayne' });
 
   const { file } = await buildPlanner({ outDir, plansDir, week: WEEK });
@@ -79,6 +83,8 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       assert.match(await page.textContent('#save-text'), /Saved — revision 1.*by shayne/);
       assert.match(await page.textContent(`.day[data-date="${MONDAY}"]`), /Lemon Garlic Butter Shrimp/);
       assert.match(await page.textContent(`.day[data-date="${MONDAY}"]`), /4 servings/);
+      assert.equal(await page.locator('.day[data-date="2026-09-06"] .freeform-input').inputValue(),
+        'Leftovers', 'a committed meal with no recipe is part of the week');
     });
 
     await t.test('the shopping list reflects the planned servings', async () => {
@@ -153,6 +159,45 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       assert.match(await page.textContent(`.day[data-date="${MONDAY}"]`), /Lemon Garlic Butter Shrimp/);
     });
 
+    await t.test('a meal that is just a name goes on the day, not the shopping list', async () => {
+      const before = await page.locator('.shopping-item').count();
+
+      await page.click('.day[data-date="2026-09-03"] [data-add]');
+      await page.fill('#recipe-search', 'Bangers and mash');
+      assert.match(await page.textContent('#freeform-add'), /Add “Bangers and mash” to Thu 3 Sep/);
+      await page.press('#recipe-search', 'Enter');
+
+      assert.equal(await page.locator('.day[data-date="2026-09-03"] .freeform-input').inputValue(),
+        'Bangers and mash');
+      assert.equal(await page.inputValue('#recipe-search'), '', 'the box clears for the next thing');
+      assert.equal(await page.locator('.shopping-item').count(), before,
+        'a meal with no recipe adds nothing to buy');
+      assert.match(await page.textContent('#shopping-freeform'), /Bangers and mash/);
+      assert.match(await page.textContent('#shopping-count'), /2 without recipes/);
+      assert.match(await page.textContent('#save-text'), /Unsaved changes/);
+    });
+
+    await t.test('renaming a free-text meal registers as an edit', async () => {
+      // The regression this guards: every free-text meal on a day looks alike
+      // unless the text itself is in daysSignature, so a rename would read as
+      // "no change", clear the draft, and come back as the old name.
+      const sunday = page.locator('.day[data-date="2026-09-06"] .freeform-input');
+      await sunday.fill('Fish and chips');
+      await sunday.dispatchEvent('change');
+      assert.match(await page.textContent('#save-text'), /Unsaved changes/);
+
+      await page.reload();
+      assert.equal(await page.locator('.day[data-date="2026-09-06"] .freeform-input').inputValue(),
+        'Fish and chips', 'the draft kept the new name');
+    });
+
+    await t.test('clearing the name removes the meal', async () => {
+      const thursday = page.locator('.day[data-date="2026-09-03"] .freeform-input');
+      await thursday.fill('   ');
+      await thursday.dispatchEvent('change');
+      assert.match(await page.textContent('.day[data-date="2026-09-03"]'), /Nothing planned/);
+    });
+
     await t.test('the downloaded plan is the JSON the CLI expects', async () => {
       await page.fill('#author', 'karen');
       await page.click(`.day[data-date="2026-09-04"] [data-add]`);
@@ -172,6 +217,8 @@ test('the planner plans a week and builds a shopping list in a real browser', as
       assert.equal(plan.revision, 2, 'the download supersedes the committed revision');
       assert.equal(plan.updated_by, 'karen');
       assert.equal(plan.days['2026-09-04'][0].slug, 'ninja-ol650-chicken-wings');
+      assert.deepEqual(plan.days['2026-09-06'], [{ text: 'Fish and chips', note: '' }],
+        'free-text meals travel in the file the CLI imports');
     });
 
     await t.test('warns when the other cook published while this draft was open', async () => {

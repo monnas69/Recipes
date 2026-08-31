@@ -181,3 +181,55 @@ test('the CLI refuses bad weeks, unknown commands and unknown recipes', async ()
   assert.equal(await main(['--help'], help.io), 0);
   assert.match(help.out.join('\n'), /import <file> \[week\]/);
 });
+
+/* ---------------- free-text meals ---------------- */
+
+test('a committed free-text meal reaches the page and the CLI', async () => {
+  const outDir = await tmp('meal-planner-free-');
+  const plansDir = await tmp('meal-planner-free-plans-');
+  const base = ['--plans', plansDir, '--out', outDir];
+
+  await writePlan(plansDir, normalizePlan({
+    week: '2026-W36',
+    days: {
+      '2026-08-31': [{ slug: 'lemon-garlic-butter-shrimp', servings: 4 }],
+      '2026-09-01': [{ text: 'Bangers and mash', note: 'use up the gravy' }]
+    }
+  }, '2026-W36'), { updatedBy: 'shayne' });
+
+  const { file } = await buildPlanner({ outDir, plansDir, week: '2026-W36' });
+  const html = await readFile(file, 'utf8');
+  const parsed = JSON.parse(html.split('id="planner-json">')[1].split('</script>')[0]);
+  assert.deepEqual(parsed.plans['2026-W36'].days['2026-09-01'],
+    [{ text: 'Bangers and mash', note: 'use up the gravy' }]);
+
+  const shown = captureIo();
+  assert.equal(await main(['show', '2026-W36', ...base], shown.io), 0);
+  assert.match(shown.out.join('\n'), /Tue 1 Sep\s+Bangers and mash {2}\(no recipe\)/);
+
+  // The list it does not appear in has to say so, or you come home without it.
+  const shopping = captureIo();
+  assert.equal(await main(['shopping', '2026-W36', ...base], shopping.io), 0);
+  const text = shopping.out.join('\n');
+  assert.match(text, /- large shrimp/);
+  assert.match(text, /Not on this list \(no recipe\):\n- Bangers and mash {2}— {2}Tue 1 Sep/);
+});
+
+test('importing a plan with free-text meals is allowed, and counted', async () => {
+  const plansDir = await tmp('meal-planner-free-import-');
+  const base = ['--plans', plansDir];
+  const source = path.join(plansDir, 'incoming.json');
+  const { writeFile } = await import('node:fs/promises');
+  await writeFile(source, JSON.stringify({
+    week: '2026-W36',
+    days: {
+      '2026-08-31': [{ slug: 'lemon-garlic-butter-shrimp' }],
+      '2026-09-01': [{ text: 'Leftovers' }, { text: 'Fish and chips' }]
+    }
+  }), 'utf8');
+
+  const imported = captureIo();
+  assert.equal(await main(['import', source, ...base], imported.io), 0,
+    'a meal with no recipe is not a missing recipe');
+  assert.match(imported.out.join('\n'), /1 recipe, 2 free-text meals/);
+});

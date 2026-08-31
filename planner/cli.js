@@ -35,6 +35,12 @@ Commands
   import <file> [week]   validate a plan downloaded from the page and save it
                          into the plans folder, ready to commit
 
+Meals without a recipe
+  A day can hold a meal that is just a name — "bangers and mash", "leftovers".
+  Type it into the filter box on the page and press return. Those meals have no
+  ingredients, so they add nothing to the shopping list; the list names them at
+  the bottom instead of pretending they are not there.
+
 Options
   -w, --week <id>        ISO week, e.g. 2026-W36            (default: this week)
       --source <path>    recipe sources                     (default: recipes)
@@ -79,15 +85,32 @@ function formatPlan(plan, recipesBySlug) {
       continue;
     }
     entries.forEach((entry, index) => {
+      const prefix = index === 0 ? label : ' '.repeat(11);
+      if (!entry.slug) {
+        lines.push(`  ${prefix}${entry.text}  (no recipe)`);
+        return;
+      }
       const recipe = recipesBySlug.get(entry.slug);
       const title = recipe ? recipe.title : `${entry.slug} (missing from recipes/)`;
       const servings = entry.servings || recipe?.base_servings;
       const unit = recipe?.servings_unit || 'servings';
       const suffix = servings ? `  [${servings} ${unit}]` : '';
-      lines.push(`  ${index === 0 ? label : ' '.repeat(11)}${title}${suffix}`);
+      lines.push(`  ${prefix}${title}${suffix}`);
     });
   }
   return lines.join('\n');
+}
+
+function countEntries(plan) {
+  let recipes = 0;
+  let freeText = 0;
+  for (const entries of Object.values(plan.days || {})) {
+    for (const entry of entries) {
+      if (entry.slug) recipes += 1;
+      else freeText += 1;
+    }
+  }
+  return { recipes, freeText };
 }
 
 export async function main(argv = process.argv.slice(2), io = console) {
@@ -181,6 +204,11 @@ export async function main(argv = process.argv.slice(2), io = console) {
 
       const { plan: saved, file: written } = await writePlan(values.plans, plan, { updatedBy: values.by });
       log(`Imported ${saved.week} → ${path.relative(process.cwd(), written)} (revision ${saved.revision})`);
+      // Free-text meals are the entries an older checkout would silently drop
+      // on the next import, so the count goes in the summary where it shows.
+      const counts = countEntries(saved);
+      log(`  • ${counts.recipes} recipe${counts.recipes === 1 ? '' : 's'}`
+        + `, ${counts.freeText} free-text meal${counts.freeText === 1 ? '' : 's'}`);
       log(formatPlan(saved, bySlug));
       log('\nCommit it to share:');
       log(`  git add ${values.plans} && git commit -m "Plan ${saved.week}" && git push`);

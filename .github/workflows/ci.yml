@@ -1,0 +1,90 @@
+# Run the test suite on every pull request, and on main.
+#
+# pages.yml also runs `npm test` before publishing, but Playwright is not
+# installed there, so the browser tests skip themselves silently — the most
+# valuable coverage in this repo never ran in CI. The `browser` job below is
+# where they actually run.
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # The project has no dependencies, so there is nothing to install.
+      - name: Run tests
+        run: npm test
+
+      - name: The site still builds
+        run: npm run site
+
+      # The planner page is published to a public site and talks to a Supabase
+      # project whose other tables are readable and writable by `anon`. A key
+      # committed anywhere here would expose them, so fail loudly rather than
+      # rely on nobody pasting one in. test/ is excluded: it asserts on these
+      # very patterns.
+      - name: No API key anywhere in the repo
+        if: matrix.node == '22'
+        run: |
+          if grep -rInE 'eyJhbGciOi|sb_publishable_|sb_secret_|service_role|SUPABASE_SERVICE_ROLE_KEY' . \
+              --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=test; then
+            echo "::error::An API key looks committed. The planner page must ship an endpoint and never a key."
+            exit 1
+          fi
+          echo "No API keys found."
+
+  browser:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # --no-save: playwright is deliberately not a dependency of this project,
+      # so the suite skips these tests for anyone who has not installed it.
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      # If Playwright were ever missing or broken, the suite would still pass by
+      # skipping — which would quietly retire the two-cook sync test and every
+      # end-to-end planner check. So run once, and insist nothing skipped.
+      # pipefail matters: without it the pipe hides a failing npm test.
+      - name: Run tests with a real browser
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee /tmp/out.txt
+          if grep -qE '^# skipped [1-9]' /tmp/out.txt; then
+            echo "::error::Browser tests skipped instead of running."
+            grep -E 'skip' /tmp/out.txt | head -20
+            exit 1
+          fi
+          echo "Nothing skipped."
